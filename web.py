@@ -77,16 +77,26 @@ def _vid(t):
             out.append(t[pos:m.start()]+I0+t[m.start():end]+I1);pos=end
     out.append(t[pos:]);return ''.join(out)
 _FUENTES=[None]
-_RR=re.compile(r'^(D|C|CTh|I)\.(\d+)\.(\d+)\.(\d+|ult)(?:\.?pr|\.(\d+|ult))?$')
+_RR=re.compile(r'^(D|C|CTh|I)\.(\d+)\.(\d+)\.(\d+|ult)(?:\.?pr|\.(\d+|ult))?$|^(PS)\.(\d+)\.(\d+)(?:\.(\d+))?$')
 def _refl(m):
     r=m.group(1);mm=_RR.match(html.unescape(r))
     if not mm or not _FUENTES[0]: return f'<span class="ref">[{r}]</span>'
     sig,b,t,l,p=mm.group(1),mm.group(2),mm.group(3),mm.group(4),mm.group(5)
+    if not sig: return f'<span class="ref">[{r}]</span>'
     dest='pr' if r.endswith('pr') else (p or '')
     q=f"{sig}.{b}.{t}.{l}"+(f".{dest}" if dest else '')
     return f'<a class="ref" href="/fons?r={q}" title="Leer el texto latino (BIA)">[{r}]</a>'
+_RM={'I':1,'II':2,'III':3,'IV':4,'V':5}
+_M='[\ue000\ue001]*';_S='(?:\\s|[\ue000\ue001])+'
+_RPS=re.compile(r'(Paull?\.?'+_S+r'[Rr]ecept\.?'+_S+r'[Ss]ent\.?'+_S+r'(?:[Ll]ib\.?'+_S+r')?)('+_M+r'(?:I{1,3}|IV|V|[1-5])'+_M+r')\s*[,.]?(?:\s|[\ue000\ue001])*(?:[Tt]it\.?\s*)?(\d{1,2})(?!\d)')
+def _ps(t):
+    if not _FUENTES[0] or 'ps' not in _FUENTES[0].obras(): return t
+    def f(m):
+        lb=re.sub('[\ue000\ue001]','',m.group(2));b=_RM.get(lb) or int(lb)
+        return f'<a class="ref" href="/fons?r=PS.{b}.{m.group(3)}" title="Pauli Sententiae {b}.{m.group(3)}: texto latino (BIA)">'+re.sub('[\ue000\ue001]','',m.group(0))+'</a>'
+    return _RPS.sub(f,t)
 def _fmt(t):
-    t=html.escape(_vid(t))
+    t=_ps(html.escape(_vid(t)))
     t=re.sub(r'\[((?:D|C|CTh|I|N)\.[^\]]*)\]',_refl,t)
     t=t.replace('⟦griego⟧','<span class="gr" title="griego ilegible en el OCR: mira la imagen de la página">⟦griego⟧</span>')
     res=[];d=0
@@ -185,7 +195,7 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
     @mcp.custom_route("/fons",methods=["GET"])
     async def fons(request):
         r=request.query_params.get('r','');mm=_RR.match(r)
-        d=_FUENTES[0].leer(mm.group(1),'.'.join(x for x in r.split('.')[1:])) if (mm and _FUENTES[0]) else None
+        d=_FUENTES[0].leer(r.split('.')[0],'.'.join(x for x in r.split('.')[1:])) if (mm and _FUENTES[0]) else None
         if not d:
             return HTMLResponse(pagina(f"<article><h2>Fons non inuentus</h2><p>No encuentro <b>{html.escape(r)}</b> en la edición de BIA (la cita puede tener un error de OCR). <a href='javascript:history.back()'>&#9756; Redi</a></p></article>",'','ambas','entrada'),status_code=404)
         dest=d['dest'];filas=[]

@@ -14,6 +14,7 @@ OBRAS = {  # sigla de Brisson -> (id, título, uuid DSpace, handle)
     'D': ('digesta', 'Digesta Iustiniani', 'df516228-3a20-4e4c-bcbc-4b6f5483d113', 'OPEN-972'),
     'C': ('codex', 'Codex Iustinianus', '8db00bdc-18ac-4fa2-9151-71d9318892f8', 'OPEN-967'),
     'CTh': ('cth', 'Codex Theodosianus', 'abd9457a-d67a-4567-80a2-b540d9286e4a', 'OPEN-968'),
+    'PS': ('ps', 'Pauli Sententiae (Receptae Sententiae)', '4968ba6f-ce21-400a-87c7-767e69cf0ca9', 'OPEN-965'),
     'I': ('inst', 'Institutiones Iustiniani', 'e412fd76-6830-4e1a-8fb1-df496d63a049', 'OPEN-962'),
 }
 _DIV = re.compile(r'^div\d*$'); _WS = re.compile(r'\s+')
@@ -135,10 +136,14 @@ class Fuentes:
         """ref = '1.1.10' o '1.1.10.pr' → (título obra, rúbrica, [(etiqueta, texto)], etiqueta destacada, nota)"""
         if not self.ok() or sig not in OBRAS: return None
         w = OBRAS[sig][0]; partes = [p for p in ref.split('.') if p]
-        if len(partes) < 3: return None
-        fr = self._frag(w, partes)
+        if sig == 'PS':
+            if len(partes) < 2: return None
+            fr = self.con.execute('SELECT * FROM nodes WHERE w=? AND key=? ORDER BY ord', (w, f'{partes[0]}.{partes[1]}')).fetchone()
+            partes = partes[:2] + [''] + partes[2:3]
+        elif len(partes) < 3: return None
+        else: fr = self._frag(w, partes)
         if not fr: return None
-        tit = self.con.execute('SELECT head FROM nodes WHERE w=? AND key=?', (w, '.'.join(partes[:2]))).fetchone()
+        tit = fr if sig == 'PS' else self.con.execute('SELECT head FROM nodes WHERE w=? AND key=?', (w, '.'.join(partes[:2]))).fetchone()
         filas = []
         def walk(n):
             if n['leaf']: filas.append((n['n'] if n['type'].lower() not in ('inscriptio', 'subscriptio') else n['type'].lower(), n['text']))
