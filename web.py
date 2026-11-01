@@ -289,15 +289,20 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
     _XII={}
     try: _XII.update(_j.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'datos','xii.json'),encoding='utf-8')))
     except Exception: pass
+    _XIIES={}
+    try: _XIIES.update(_j.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'datos','xii_es.json'),encoding='utf-8')))
+    except Exception: pass
     @mcp.custom_route("/tabulae",methods=["GET"])
     async def tabulae(request):
         if not _XII: return HTMLResponse(pagina("<p>Texto no disponible.</p>",'','ambas','entrada'),status_code=404)
         h=["<article class='txs'><h2>Duodecim Tabularum leges</h2><div class='meta'>Ley de las Doce Tablas, mediados del siglo V a. C.</div><p class='mut'>El texto original no se conserva: se reconstruye a partir de citas de autores posteriores (Livio, Cicer\u00f3n, Gayo, Gellius\u2026). Los pasajes entre par\u00e9ntesis son testimonios de esos autores. Los puntos suspensivos marcan lagunas y &lt;lo as\u00ed&gt; lo a\u00f1adido por los editores.</p><p class='sg'>"+' '.join(f"<a href='#t{n}'>{n}</a>" for n in range(1,13))+"</p>"]
         for n in range(1,13):
             h.append(f"<h3 id='t{n}'>Tabula {n}</h3>")
-            for b in _XII.get(str(n),[]):
+            es=_XIIES.get(str(n),[])
+            for i,b in enumerate(_XII.get(str(n),[])):
                 h.append(f"<p lang='la'{' class=\"mut\"' if b['x'] else ''}>{html.escape(b['t'])}</p>")
-        h.append("<p class='mut'>Texto: The Latin Library (dominio p\u00fablico), <i>Duodecim Tabularum leges</i>. Para la edici\u00f3n cr\u00edtica de Bruns (<i>Fontes iuris Romani antiqui</i>, 1909) usa el conector de fuentes romanas.</p><p><a href='javascript:history.back()'>&#9756; Redi ad vocem</a></p></article>")
+                if i<len(es): h.append(f"<p class='mut' lang='es' style='margin-top:-.5em;padding-left:1em;border-left:2px solid #c9b98a'>{html.escape(es[i])}</p>")
+        h.append("<p class='mut'>Texto: The Latin Library (dominio p\u00fablico), <i>Duodecim Tabularum leges</i>. La traducci\u00f3n al espa\u00f1ol (en gris, bajo cada pasaje) es m\u00eda (de Claude), orientativa y de libre uso, hecha sobre este texto latino reconstruido; no es una edici\u00f3n acad\u00e9mica. Para la edici\u00f3n cr\u00edtica de Bruns (<i>Fontes iuris Romani antiqui</i>, 1909) usa el conector de fuentes romanas.</p><p><a href='javascript:history.back()'>&#9756; Redi ad vocem</a></p></article>")
         return HTMLResponse(pagina(''.join(h),'','ambas','entrada'))
     @mcp.custom_route("/textus",methods=["GET"])
     async def textus(request):
