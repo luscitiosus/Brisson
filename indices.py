@@ -1,7 +1,6 @@
 """Índices de la web: autores y obras citados, tabla de voces por letra y loci (títulos del Digesto/Código citados)."""
 import html,re,json,os,collections
 from urllib.parse import quote
-from starlette.responses import HTMLResponse
 AQUI=os.path.dirname(os.path.abspath(__file__))
 REF=re.compile(r'\[(D|C|CTh)\.(\d+)\.(\d+)\.(\d+|ult)(?:pr|\.\d+)?\]')
 LOCW={'Lib','Libr','Cap','Idem','Vid','Tom','Tomo','Tit','Lect','Lectionum','Cap','Libro','Orat'}
@@ -14,6 +13,7 @@ def _titulos(fn):
     except OSError: pass
     return T
 def montar(mcp,D,pagina,AUT,RXA):
+    from web import HTMLResponse
     OB=json.load(open(os.path.join(AQUI,'fuentes_obras.json'),encoding='utf-8'))
     DT=_titulos('dtitles.txt');CT=_titulos('ctitles.txt')
     EA=[collections.Counter() for _ in D]      # autores por entrada

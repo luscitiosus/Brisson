@@ -1,7 +1,17 @@
 """Página web de consulta (sin Claude) para el léxico de Brisson: / (buscador), con paginación mínima y sin JavaScript."""
 import html,re
 from urllib.parse import quote
-from starlette.responses import HTMLResponse
+from starlette.responses import HTMLResponse as _HR
+_LIG=re.compile(r'ae|AE|Ae|aE')
+def _lig(m):
+    x=m.group(0);return 'Æ' if x[0]=='A' else 'æ'
+_SPL=re.compile(r'(<style.*?</style>|<script.*?</script>|<[^>]+>)',re.S)
+def lig_html(h):
+    p=_SPL.split(h)
+    return ''.join(x if i%2 else _LIG.sub(_lig,x) for i,x in enumerate(p))
+class HTMLResponse(_HR):
+    def __init__(self,content,*a,**k):
+        super().__init__(lig_html(content) if isinstance(content,str) else content,*a,**k)
 
 CSS="""
 @font-face{font-family:'Ibarra Real Nova';src:url('/fuente?f=Regular') format('truetype');font-weight:400;font-style:normal;font-display:swap}
