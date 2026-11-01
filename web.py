@@ -335,13 +335,8 @@ def _herramientas(e,i):
     hw=html.escape(e['hw']);pg=e['page']
     cita=f"Brisson, B., <i>De verborum quae ad ius pertinent significatione</i>, ed. I. G. Heineccius, Halle, 1743, s. v. {hw}, p. {pg} del PDF."
     plano=f"Brisson, B., De verborum quae ad ius pertinent significatione, ed. I. G. Heineccius, Halle, 1743, s. v. {e['hw']}, p. {pg} del PDF."
-    k=f"nota:{e['hw']}"
-    return (f"<details class='lxp'><summary>Citar y anotar</summary><p lang='es'>{cita}</p>"
-            f"<p><button type='button' onclick=\"navigator.clipboard&&navigator.clipboard.writeText({html.escape(_j.dumps(plano))});this.textContent='Copiado'\">Copiar cita</button></p>"
-            f"<p><b>Mis notas</b> <small class='mut'>(se guardan solo en este navegador)</small></p>"
-            f"<textarea id='nt' rows='5' style='width:100%;box-sizing:border-box' placeholder='Notas sobre esta voz\u2026'></textarea>"
-            f"<p><a href='/notae'>Ver y exportar todas mis notas</a></p>"
-            f"<script>(function(){{var t=document.getElementById('nt'),k={_j.dumps(k)};try{{t.value=localStorage.getItem(k)||''}}catch(e){{}}t.addEventListener('input',function(){{try{{if(t.value)localStorage.setItem(k,t.value);else localStorage.removeItem(k)}}catch(e){{}}}})}})();</script></details>")
+    return (f"<details class='lxp'><summary>Citar</summary><p lang='es'>{cita}</p>"
+            f"<p><button type='button' onclick=\"navigator.clipboard&&navigator.clipboard.writeText({html.escape(_j.dumps(plano))});this.textContent='Copiado'\">Copiar cita</button></p></details>")
 _TIT=[None]
 _INS={}
 def _pasajes(e):
@@ -398,7 +393,7 @@ def pagina(cuerpo,q='',capa='ambas',modo='entrada'):
     sel=lambda v,x:' checked' if v==x else ''
     return f"""<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Brisson · léxico jurídico latino</title><style>{CSS}</style></head><body><main>
-<nav class="top"><a href="/">Quaerere</a><a href="/indice">Index vocum</a><a href="/auctores">Auctores</a><a href="/tabula">Tabula</a><a href="/loci">Loci</a><a href="/leges">Leges</a><a href="/tabulae">XII Tab.</a><a href="/lexicon">Lexicon</a><a href="/notae">Notae</a><a href="/fortuita">Vox fortuita</a></nav>
+<nav class="top"><a href="/">Quaerere</a><a href="/indice">Index vocum</a><a href="/auctores">Auctores</a><a href="/tabula">Tabula</a><a href="/loci">Loci</a><a href="/leges">Leges</a><a href="/tabulae">XII Tab.</a><a href="/lexicon">Lexicon</a><a href="/fortuita">Vox fortuita</a></nav>
 <h1>Brisson, <i>De verborum quae ad ius pertinent significatione</i></h1>
 <p class="sub">Edición de Heineccio (Halle, 1743). Texto de OCR, con Brisson y Heineccio en capas distintas.</p>
 <figure class="fr"><img src="/portada.jpg" alt="Frontispicio grabado de la edición de 1743: retratos de Brisson y de Heineccio" width="900" height="806" loading="lazy"><figcaption>Frontispicio de la edición de 1743 (grabado de G. A. Gründler y Susang): Brisson y Heineccio. Imagen de la ULB Sachsen-Anhalt, Halle.</figcaption></figure>
@@ -464,10 +459,6 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
     try: _XIIES.update(_j.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'datos','xii_es.json'),encoding='utf-8')))
     except Exception: pass
     _LXT={}
-    @mcp.custom_route("/notae",methods=["GET"])
-    async def notae(request):
-        h="<article><h2>Notae meae</h2><p class='mut'>Tus notas, guardadas solo en este navegador (no est\u00e1n en el servidor).</p><div id='nl'></div><p><button type='button' id='cp'>Copiar todas</button></p><script>(function(){var d=document.getElementById('nl'),o=[];try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k.indexOf('nota:')==0)o.push([k.slice(5),localStorage.getItem(k)])}}catch(e){}o.sort();if(!o.length)d.innerHTML='<p>Todav\u00eda no hay notas.</p>';var tx=o.map(function(x){return x[0]+'\\n'+x[1]}).join('\\n\\n');o.forEach(function(x){var p=document.createElement('div');var b=document.createElement('b');b.textContent=x[0];var q=document.createElement('p');q.style.whiteSpace='pre-wrap';q.textContent=x[1];p.appendChild(b);p.appendChild(q);d.appendChild(p)});document.getElementById('cp').onclick=function(){navigator.clipboard&&navigator.clipboard.writeText(tx);this.textContent='Copiado'}})();</script><p><a href='javascript:history.back()'>&#9756; Redi</a></p></article>"
-        return HTMLResponse(pagina(h,'','ambas','entrada'))
     @mcp.custom_route("/lexicon",methods=["GET"])
     async def lexicon(request):
         import lexica
