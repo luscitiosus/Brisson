@@ -47,7 +47,7 @@ article h2{font-size:1.25rem;margin:.8rem 0 .1rem}.meta{color:var(--mut);font-si
 .gr{background:var(--line);padding:0 .3em;border-radius:3px;font-size:.85em}
 #pref>summary{text-align:center;font-weight:400}#pref>summary:before{content:"\\2766\\00a0"}#pref>summary:after{content:"\\00a0\\2766"}
 .ref{color:var(--cor);font-size:.9em}
-.lxp{margin:1rem 0;font-size:.92rem}.lxp .lsx{border-left:3px solid var(--line);padding-left:.7rem}.lxp .lsx p{margin:.35rem 0;text-align:left}.lxp p{text-align:left}
+.lxp{margin:1rem 0;font-size:.92rem}.lxp .lsx{border-left:3px solid var(--line);padding-left:.7rem}.lxp .lsx p{margin:.35rem 0;text-align:left}.lxp details.sn{margin:.3rem 0}.lxp details.sn>summary{cursor:pointer;font-size:.9rem}.lxp details.jur>summary{font-weight:bold}.lxp p{text-align:left}
 .txs p{text-align:justify;hyphens:auto}.txs .ct{display:flex;justify-content:space-between;gap:1rem;margin:1rem 0}
 a.ref{text-decoration:underline dotted}
 a.lex{color:inherit;text-decoration:underline dotted var(--hein)}
@@ -200,6 +200,54 @@ def _navbtn(i,lado):
     else:
         h=f"<a class='nv' href='/entrada?n={i+1}'>Vox posterior &#9758;<small>{html.escape(_D[i+1]['hw'])}</small></a>" if i<len(_D)-1 else ''
     return f"<div class='pn2'>{h}</div>" if h else ''
+_LSJ=re.compile(r"\b(?:law|legal|jurid|jur\. t\. t|Dig\.|Gai\.? Inst|Just\. Inst|Cod\. Just|Cod\. Th|judg|court|contract|testament|inherit|will\b|heir|obligat)",re.I)
+_LSD=re.compile(r"Dig\.\s+(\d+),\s*(\d+),\s*(\d+)(?:,\s*\u00a7\s*(\d+))?")
+_LSI=re.compile(r"Just\.\s+Inst\.\s+(\d+),\s*(\d+)(?:,\s*(\d+))?")
+_LSC=re.compile(r"Cod\.\s+Just\.\s+(\d+),\s*(\d+),\s*(\d+)")
+_LSA=re.compile(r"\b(Liv|Gell)\.\s+(\d+),\s*(\d+)")
+def _lslink(t):
+    if _FUENTES[0]:
+        t=_LSD.sub(lambda m:f'<a class="ref" href="/fons?r=D.{m.group(1)}.{m.group(2)}.{m.group(3)}'+(f'.{m.group(4)}' if m.group(4) else '')+f'">{m.group(0)}</a>',t)
+        t=_LSI.sub(lambda m:f'<a class="ref" href="/fons?r=I.{m.group(1)}.{m.group(2)}'+(f'.{m.group(3)}' if m.group(3) else '')+f'">{m.group(0)}</a>',t)
+        t=_LSC.sub(lambda m:f'<a class="ref" href="/fons?r=C.{m.group(1)}.{m.group(2)}.{m.group(3)}">{m.group(0)}</a>',t)
+    def au(m):
+        a={'Liv':'livius','Gell':'gellius'}[m.group(1)];W=_AUC.get(a)
+        if W and f"{m.group(2)}.{m.group(3)}" in W['p']: return f'<a class="ref" href="/textus?a={a}&amp;l={m.group(2)}&amp;c={m.group(3)}">{m.group(0)}</a>'
+        return m.group(0)
+    return _LSA.sub(au,t)
+def _lsbloque(x):
+    """Entrada L&S: encabezado + sentidos de nivel 1 plegables; el sentido jurídico se abre y se marca."""
+    ls=x['t'].split('\n');cab=[ls[0]];bl=[]
+    for ln in ls[1:]:
+        if ln.startswith('&nbsp;') and bl: bl[-1].append(ln)
+        elif ln.strip():
+            if not bl and not re.match(r'^[IVX]+\.|^[A-Z]\.|^\d+\.',ln): cab.append(ln);continue
+            bl.append([ln])
+    h=[f"<p>{_lslink(c)}</p>" for c in cab]
+    for g in bl:
+        txt=' '.join(g);jur=bool(_LSJ.search(re.sub(r'<[^>]+>','',txt)))
+        pl=re.sub(r'<[^>]+>','',g[0]);rot=pl[:90]+('\u2026' if len(pl)>90 else '')
+        cu=''.join(f"<p>{_lslink(z)}</p>" for z in g)
+        h.append(f"<details class='sn{' jur' if jur else ''}'{' open' if jur else ''}><summary>{'\u2696 ' if jur else ''}{rot}</summary>{cu}</details>")
+    return ''.join(h)
+_FAM={}
+def _familia(k,v):
+    import lexica
+    L=lexica.cargar();P=L.get('_par',{})
+    if not _FAM and _D:
+        for i,e in enumerate(_D):
+            kk,_=lexica.buscar(e['hw'])
+            if kk: _FAM.setdefault(kk,[]).append(i)
+    def raiz(z):
+        for _ in range(4):
+            p=P.get(z)
+            if not p: break
+            z=p
+        return z
+    r=raiz(k);ids=[]
+    for kk,li in _FAM.items():
+        if kk!=k and raiz(kk)==r: ids+=li
+    return ids
 def _lexpanel(hw):
     try:
         import lexica
@@ -208,10 +256,15 @@ def _lexpanel(hw):
     if not v: return ''
     h=[]
     for x in v.get('el',[])[:2]: h.append(f"<p lang='en'><b>Elementary Latin Dictionary</b> <span class='mut'>s.v.</span> <i>{html.escape(x['k'])}</i>: {x['t']}</p>")
-    for x in v.get('ls',[])[:3]:
-        h.append(f"<p lang='en'><b>Lewis &amp; Short</b> <span class='mut'>s.v.</span> <i>{html.escape(x['k'])}</i></p><div class='lsx' lang='en'>"+''.join(f"<p>{ln}</p>" for ln in x['t'].split('\n'))+"</div>")
-    h.append(f"<p class='mut'>Lewis &amp; Short, <i>A Latin Dictionary</i> (1879), y Lewis, <i>An Elementary Latin Dictionary</i> (1890), en la edici\u00f3n digital de la Perseus Digital Library (<a href='https://github.com/PerseusDL/lexica' target='_blank' rel='noopener'>PerseusDL/lexica</a>, CC BY-SA 4.0). La entrada se ha buscado por la forma de la cabecera; si no es el lema, comp\u00e1rala con el texto de Brisson.</p>")
-    return f"<details class='lxp'><summary>Lexica: Lewis &amp; Short <small class='mut'>(s.v. {html.escape(v['ls'][0]['k'] if v.get('ls') else v['el'][0]['k'])})</small></summary>"+''.join(h)+"</details>"
+    lss=sorted(v.get('ls',[]),key=lambda x:-len(_LSJ.findall(re.sub(r'<[^>]+>','',x['t']))))[:3]
+    for x in lss:
+        h.append(f"<p lang='en'><b>Lewis &amp; Short</b> <span class='mut'>s.v.</span> <i>{html.escape(x['k'])}</i></p><div class='lsx' lang='en'>"+_lsbloque(x)+"</div>")
+    try:
+        fam=_familia(k,v)
+        if fam: h.append("<p class='mut'><b>Familia l\u00e9xica</b> en Brisson (misma ra\u00edz): "+' '.join(f"<a href='/entrada?n={i}'>{html.escape(_D[i]['hw'])}</a>" for i in fam[:40])+(" \u2026" if len(fam)>40 else '')+"</p>")
+    except Exception: pass
+    h.append(f"<p class='mut'>Lewis &amp; Short, <i>A Latin Dictionary</i> (1879), y Lewis, <i>An Elementary Latin Dictionary</i> (1890), en la edici\u00f3n digital de la Perseus Digital Library (<a href='https://github.com/PerseusDL/lexica' target='_blank' rel='noopener'>PerseusDL/lexica</a>, CC BY-SA 4.0). Las entradas se ordenan poniendo primero las de sentido jur\u00eddico; \u2696 marca los sentidos con vocabulario jur\u00eddico. La voz se ha buscado por su lema probable; comp\u00e1rala con el texto de Brisson.</p>")
+    return f"<details class='lxp'><summary>Lexica: Lewis &amp; Short <small class='mut'>(s.v. {html.escape(lss[0]['k'] if lss else v['el'][0]['k'])})</small></summary>"+''.join(h)+"</details>"
 def _entrada(e,capa,imagen_url,i=None):
     nT=sum(1 for s in e['segs'] if s['k']=='T');ng=e.get('ngr',0)
     out=[f"<article><h2>{html.escape(e['hw'])}</h2><div class='meta'>p. {e['page']} del PDF · "

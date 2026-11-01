@@ -55,4 +55,6 @@ def buscar(hw):
         if v and any(_VERBO.search(x['t'][:400]) for x in v.get('ls',[])+v.get('el',[])): return k,v
     for k in candidatos(hw):
         if k in L: return k,L[k]
+    k=L.get('_alias',{}).get(norm(hw))
+    if k and k in L: return k,L[k]
     return None,None
