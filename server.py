@@ -83,6 +83,8 @@ def brisson_pagina(pagina:int)->str:
 def ligaturas_griegas()->Image:
     """Lámina de ligaturas y abreviaturas del griego impreso (C. Cobley). Úsala para leer el griego de una captura del libro."""
     return Image(data=open(os.path.join(HERE,'ligaturas_griegas.png'),'rb').read(),format='png')
+import web
+web.registrar(mcp,D,BY,KEYS,key,stems,imagen_url)
 if __name__=="__main__":
     if "--stdio" in sys.argv: mcp.run("stdio")
     else:
