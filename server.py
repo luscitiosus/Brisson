@@ -8,7 +8,7 @@ import json,re,os,sys
 from mcp.server.fastmcp import FastMCP, Image
 HERE=os.path.dirname(os.path.abspath(__file__))
 import urn_halle
-INSTRUCTIONS="""Léxico jurídico latino de Brisson con las notas de Heineccio (1743). `brisson(palabra)` da la entrada con el texto íntegro y las citas ya convertidas a numeración moderna entre [corchetes] (D., C.); la capa dice qué es de Brisson y qué termina en HEIN. `brisson_texto` busca dentro de todas las entradas. `brisson_revisar(palabra)` revisa una entrada contra un corpus de formas latinas y propone correcciones de OCR (son candidatos, no certezas). El griego del OCR es ilegible y aparece como ⟦griego⟧: da al usuario el enlace de la página y pídele una captura de la línea; con `ligaturas_griegas` tienes la lámina de nexos para leerla. Lo que leas en una imagen es lectura tuya, no texto verificado: dilo. Los números de las citas pueden tener errores de OCR; no los des por buenos sin contrastarlos con el conector de fuentes romanas."""
+INSTRUCTIONS="""Léxico jurídico latino de Brisson con las notas de Heineccio (1743). `brisson(palabra)` da la entrada con el texto íntegro y las citas ya convertidas a numeración moderna entre [corchetes] (D., C.); la capa dice qué es de Brisson y qué termina en HEIN. `brisson_texto` busca dentro de todas las entradas. `brisson_revisar(palabra)` revisa una entrada contra un corpus de formas latinas y propone correcciones de OCR (son candidatos, no certezas). Si el servidor tiene la clave, `brisson` añade al final las entradas del Diccionario de Derecho Romano (Reus, 1982; definiciones en español, de uso privado) y `diccionario(termino)` lo consulta directamente; cítalo como tal y no lo reproduzcas fuera de la conversación. El griego del OCR es ilegible y aparece como ⟦griego⟧: da al usuario el enlace de la página y pídele una captura de la línea; con `ligaturas_griegas` tienes la lámina de nexos para leerla. Lo que leas en una imagen es lectura tuya, no texto verificado: dilo. Los números de las citas pueden tener errores de OCR; no los des por buenos sin contrastarlos con el conector de fuentes romanas."""
 _SECRET=os.environ.get("MCP_SECRET","").strip("/")
 PATH=os.environ.get("MCP_PATH") or (f"/{_SECRET}/mcp" if _SECRET else "/mcp")
 mcp=FastMCP("Brisson",instructions=INSTRUCTIONS,host="0.0.0.0",port=int(os.environ.get("PORT","8000")),streamable_http_path=PATH,stateless_http=True,json_response=True)
@@ -51,6 +51,26 @@ def render(idxs,capa):
             elif s['k']=='B' and capa in('ambas','brisson'): parts.append("[Brisson] "+s['t'])
             elif s['k']=='C' and capa in('ambas','corchetes'): parts.append("[Entre corchetes en la edición] "+s['t'])
     return "\n".join(parts)
+def _dicc_texto(idx):
+    """Entradas del Diccionario de Derecho Romano (Reus, 1982) para las voces de Brisson dadas; solo con DICT_KEY."""
+    try:
+        import diccionario
+        if not diccionario.disponible(): return ""
+        import lexica
+        vis=[];out=[];rel_all=[]
+        for i in idx:
+            lem=lexica.buscar(D[i]['hw'])[0]
+            ex,rel=diccionario.buscar(D[i]['hw'],[lem] if lem else [])
+            for e in ex:
+                if e['hw'] not in vis: vis.append(e['hw']);out.append(diccionario.texto(e))
+            for r in rel:
+                if r not in rel_all and r not in vis: rel_all.append(r)
+        if not out and not rel_all: return ""
+        t="\n\n## Diccionario de Derecho Romano (Instituto Editorial Reus, Madrid, 1982; uso privado)\n"
+        t+="\n".join(out) if out else "(sin entrada con la misma cabecera)"
+        if rel_all: t+="\nVoces relacionadas del Diccionario (usa la herramienta diccionario para leerlas): "+"; ".join(rel_all[:40])
+        return t
+    except Exception: return ""
 @mcp.tool()
 def brisson(palabra:str,capa:str="ambas",parte:int=1,max_caracteres:int=6000)->str:
     """Entrada de Brisson para una palabra latina (u/v, i/j indiferentes; admite formas flexionadas simples). capa: ambas|brisson|heineccio|corchetes. Texto íntegro con citas; si es largo, usa parte=2,3…"""
@@ -62,10 +82,29 @@ def brisson(palabra:str,capa:str="ambas",parte:int=1,max_caracteres:int=6000)->s
         cand=[x for x in KEYS if x.startswith(stems(k)[-1])][:15]
         if not cand: return f"Sin entrada para «{palabra}». Prueba brisson_texto."
         return "Sin coincidencia exacta. Entradas próximas: "+", ".join(D[BY[c][0]]['hw'] for c in cand)
-    txt=render(idx,capa)
+    txt=render(idx,capa)+_dicc_texto(idx)
     n=max(1,-(-len(txt)//max_caracteres)); parte=max(1,min(parte,n))
     out=txt[(parte-1)*max_caracteres:parte*max_caracteres]
     return out+(f"\n[parte {parte}/{n}]" if n>1 else "")
+@mcp.tool()
+def diccionario(termino:str,max_resultados:int=8,max_caracteres:int=6000)->str:
+    """Diccionario de Derecho Romano (Instituto Editorial Reus, Madrid, 1982; definiciones en español, con citas de fuentes). Busca por cabecera (palabra o frase latina, u/v indiferentes) y, si no hay, dentro del texto de las definiciones. Texto de uso privado: no lo publiques."""
+    import diccionario as dd
+    from lexica import norm
+    if not dd.disponible(): return "El Diccionario no está disponible: falta la clave DICT_KEY en el servidor."
+    C=dd.cargar();q=' '.join(norm(w.replace('0','O')) for w in termino.split() if norm(w))
+    ids=list(C['k'].get(q,[]))
+    for k,li in C['k'].items():
+        if len(ids)>=max_resultados: break
+        if k.startswith(q) and not set(li)<=set(ids): ids+=[i for i in li if i not in ids]
+    if len(ids)<max_resultados:
+        rx=re.compile(''.join('[uv]' if c in 'uvUV' else re.escape(c) for c in termino),re.I)
+        for i,e in enumerate(C['e']):
+            if i not in ids and rx.search(e['t']): ids.append(i)
+            if len(ids)>=max_resultados: break
+    if not ids: return f"Sin resultados para «{termino}» en el Diccionario."
+    out="\n".join(dd.texto(C['e'][i]) for i in ids[:max_resultados])
+    return out[:max_caracteres]+("…" if len(out)>max_caracteres else "")
 @mcp.tool()
 def brisson_revisar(palabra:str,max_resultados:int=40)->str:
     """Revisa una entrada contra un corpus de ~560.000 formas latinas declinadas (Latin Library, Perseus) y los nombres de juristas y autores: marca palabras sospechosas de error de OCR y propone correcciones (forma parecida, palabras pegadas o separadas). No modifica nada: da candidatos con su frecuencia para confirmarlos."""

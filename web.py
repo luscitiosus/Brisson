@@ -280,6 +280,19 @@ def _familia(k,v):
     for kk,li in _FAM.items():
         if kk!=k and raiz(kk)==r: ids+=li
     return ids
+def _dicpanel(hw):
+    """Remisión (sin texto) al Diccionario de Derecho Romano de Reus (1982): el texto solo sale por el conector MCP."""
+    try:
+        import diccionario,lexica
+        if not diccionario.disponible(): return ''
+        lem=lexica.buscar(hw)[0]
+        ex,rel=diccionario.buscar(hw,[lem] if lem else [])
+    except Exception: return ''
+    if not ex and not rel: return ''
+    p=''
+    if ex: p+="<p><b>Cabecera(s) propia(s):</b> "+', '.join(html.escape(e['hw']) for e in ex[:6])+"</p>"
+    if rel: p+="<p><b>Voces relacionadas:</b> "+'; '.join(html.escape(r) for r in rel[:30])+(" \u2026" if len(rel)>30 else '')+"</p>"
+    return "<details class='lxp'><summary>Diccionario de Derecho Romano (Reus, 1982) <small class='mut'>(remisi\u00f3n)</small></summary>"+p+"<p class='mut'>Instituto Editorial Reus, <i>Diccionario de Derecho Romano</i>, Madrid, 1982. Es una obra con derechos de autor: aqu\u00ed solo se muestran las cabeceras; las definiciones se leen desde el conector de Claude (herramienta <i>diccionario</i> o la propia entrada con <i>brisson</i>).</p></details>"
 def _lexpanel(hw):
     try:
         import lexica
@@ -372,6 +385,7 @@ def _entrada(e,capa,imagen_url,i=None):
         out.append(f"<div class='seg {k}' lang='la'><span class='tag'>{tag}</span>{_fmt(s.get('h',s['t']))}</div>")
     try: out.append(_pasajes(e))
     except Exception: pass
+    out.append(_dicpanel(e['hw']))
     out.append(_lexpanel(e['hw']))
     if i is not None and _D:
         try: out.append(_cocitas(i))

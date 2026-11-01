@@ -7,3 +7,5 @@ services:
     envVars:
       - key: MCP_SECRET
         generateValue: true
+      - key: DICT_KEY
+        sync: false
