@@ -21,7 +21,7 @@ article h2{font-size:1.25rem;margin:.8rem 0 .1rem}.meta{color:var(--mut);font-si
 .T .tag{color:var(--hein)}.C .tag{color:var(--cor)}
 .gr{background:var(--line);padding:0 .3em;border-radius:3px;font-size:.85em}
 .ref{color:var(--cor);font-size:.9em}
-i{font-style:italic}a{color:var(--cor)}ul.c{columns:2;padding-left:1.1rem}.mut{color:var(--mut)}
+i{font-style:italic}details{margin:1.6rem 0;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:.2rem 1rem}summary{cursor:pointer;font-weight:600;padding:.6rem 0}.pf p{margin:.7rem 0;text-align:justify}.pf .pn{font:.75rem system-ui,sans-serif;color:var(--mut);display:block;margin-top:1rem}a{color:var(--cor)}ul.c{columns:2;padding-left:1.1rem}.mut{color:var(--mut)}
 footer{margin-top:2rem;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8rem}
 @media(max-width:480px){body{font-size:17px}ul.c{columns:1}}
 """
@@ -41,6 +41,8 @@ def _entrada(e,capa,imagen_url):
         tag={'T':'Tramo que termina en HEIN. (nota de Heineccio)','B':'Brisson','C':'Entre corchetes en la edición'}[k]
         out.append(f"<div class='seg {k}'><span class='tag'>{tag}</span>{_fmt(s.get('h',s['t']))}</div>")
     out.append("</article>");return ''.join(out)
+PREF="""<details id="pref"><summary>Disertación del comienzo: Praefatio nova de J. H. Boehmer (De interpretationis grammaticae fatis et usu vario in iure Romano)</summary><div id="prefbox"><p class="mut">Cargando…</p><noscript><p><a href="/prefacio">Abrir el texto en una página aparte</a></p></noscript></div></details>
+<script>document.getElementById('pref').addEventListener('toggle',function(){if(this.open&&!this.dataset.ok){this.dataset.ok=1;fetch('/prefacio?fragmento=1').then(function(r){return r.text()}).then(function(h){document.getElementById('prefbox').innerHTML=h}).catch(function(){document.getElementById('prefbox').innerHTML='<p><a href="/prefacio">Abrir en página aparte</a></p>'})}})</script>"""
 def pagina(cuerpo,q='',capa='ambas',modo='entrada'):
     sel=lambda v,x:' checked' if v==x else ''
     return f"""<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -51,8 +53,23 @@ def pagina(cuerpo,q='',capa='ambas',modo='entrada'):
 <div class="opts"><label><input type="radio" name="modo" value="entrada"{sel(modo,'entrada')}> entrada</label><label><input type="radio" name="modo" value="texto"{sel(modo,'texto')}> en todo el texto</label>
 <label>capa <select name="capa"><option value="ambas"{' selected' if capa=='ambas' else ''}>ambas</option><option value="brisson"{' selected' if capa=='brisson' else ''}>solo Brisson</option><option value="heineccio"{' selected' if capa=='heineccio' else ''}>solo Heineccio</option><option value="corchetes"{' selected' if capa=='corchetes' else ''}>solo corchetes</option></select></label></div></form>
 {cuerpo}
+{PREF}
 <footer>OCR sin revisar: los números de las citas pueden estar mal leídos y el griego sale como ⟦griego⟧ (consulta la imagen). Capa «Heineccio»: tramo que termina con la firma HEIN. y puede incluir texto de Brisson anterior a la nota. Uso académico; contrasta las citas con las fuentes.</footer></main></body></html>"""
+def _prefacio(imagen_url):
+    import json,os
+    P=json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'prefacio.json'),encoding='utf-8'))
+    out=[f"<div class='pf'><p class='mut'>{html.escape(P['titulo'])}. Texto de OCR sin revisar; antes de cada página hay un enlace a su imagen.</p>"]
+    for pg in P['paginas']:
+        out.append(f"<span class='pn'><a href='{html.escape(imagen_url(pg['n']))}' target='_blank' rel='noopener'>página {pg['n']} del PDF</a></span>")
+        for par in pg['t'].split('\n\n'):
+            if par.strip(): out.append('<p>'+_fmt(par.strip())+'</p>')
+    out.append('</div>');return ''.join(out)
 def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
+    @mcp.custom_route("/prefacio",methods=["GET"])
+    async def prefacio(request):
+        frag=_prefacio(imagen_url)
+        if request.query_params.get('fragmento'): return HTMLResponse(frag)
+        return HTMLResponse(pagina(frag,'', 'ambas','entrada').replace(PREF,'',1))
     @mcp.custom_route("/",methods=["GET"])
     async def inicio(request):
         q=(request.query_params.get('q') or '').strip()[:80];capa=request.query_params.get('capa','ambas');modo=request.query_params.get('modo','entrada')
