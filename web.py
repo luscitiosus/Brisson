@@ -91,20 +91,11 @@ def _entrada(e,capa,imagen_url,i=None):
         if capa=='brisson' and k!='B' or capa=='heineccio' and k!='T' or capa=='corchetes' and k!='C': continue
         tag={'T':'Tramo que termina en HEIN. (nota de Heineccio)','B':'Brisson','C':'Entre corchetes en la edición'}[k]
         out.append(f"<div class='seg {k}' lang='la'><span class='tag'>{tag}</span>{_fmt(s.get('h',s['t']))}</div>")
-    plain=lambda t:t.replace('\ue000','').replace('\ue001','')
-    lab={'T':'[Tramo que termina en HEIN.]','B':'[Brisson]','C':'[Entre corchetes en la edición]'}
-    pr=("Traduce al español, con precisión jurídica, esta entrada del léxico latino de Brisson (De verborum quae ad ius pertinent significatione, ed. Heineccio, Halle 1743; texto de OCR, puede tener errores). "
-        "Mantén las citas completas, conserva la distinción entre Brisson y las notas de Heineccio y señala las palabras dudosas.\n\nEntrada: "+e['hw']+f" (p. {e['page']} del PDF)\n\n"
-        +"\n\n".join(lab[s['k']]+' '+plain(s['t']) for s in e['segs']))
-    out.append("<button type='button' class='vers' onclick='pedir(this)' data-p='"+html.escape(pr,quote=True)+"'><span class='s'>Versionem Hispanicam mihi da!</span></button><div class='vmsg'></div>")
     if i is not None and _D: out.append(_navbtn(i))
     out.append("</article>");return ''.join(out)
 PREF="""<details id="pref"><summary>Disertación del comienzo: Praefatio nova de J. H. Boehmer (De interpretationis grammaticae fatis et usu vario in iure Romano)</summary><div id="prefbox"><p class="mut">Cargando…</p><noscript><p><a href="/prefacio">Abrir el texto en una página aparte</a></p></noscript></div></details>
 <script>document.getElementById('pref').addEventListener('toggle',function(){if(this.open&&!this.dataset.ok){this.dataset.ok=1;fetch('/prefacio?fragmento=1').then(function(r){return r.text()}).then(function(h){document.getElementById('prefbox').innerHTML=h}).catch(function(){document.getElementById('prefbox').innerHTML='<p><a href="/prefacio">Abrir en página aparte</a></p>'})}})</script>"""
-SCRIPT="""<script>function pedir(b){var p=b.getAttribute('data-p'),m=b.nextElementSibling;var u='https://claude.ai/new?q='+encodeURIComponent(p);if(u.length>7500)u='https://claude.ai/new';
-function ok(t){m.textContent=t}
-try{navigator.clipboard.writeText(p).then(function(){ok('Texto copiado; si no se rellena solo, pégalo en Claude.')},function(){ok('Copia el texto y pégalo en Claude.')})}catch(e){ok('Copia el texto y pégalo en Claude.')}
-window.open(u,'_blank','noopener')}</script>"""
+SCRIPT=""
 def pagina(cuerpo,q='',capa='ambas',modo='entrada'):
     sel=lambda v,x:' checked' if v==x else ''
     return f"""<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
