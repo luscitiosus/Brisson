@@ -23,8 +23,8 @@ article h2{font-size:1.25rem;margin:.8rem 0 .1rem}.meta{color:var(--mut);font-si
 .ref{color:var(--cor);font-size:.9em}
 i{font-style:italic}details{margin:1.6rem 0;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:.2rem 1rem}summary{cursor:pointer;font-weight:600;padding:.6rem 0}.pf p{margin:.7rem 0;text-align:justify}.pf .pn{font:.75rem system-ui,sans-serif;color:var(--mut);display:block;margin-top:1rem}figure.fr{margin:.6rem auto 1rem;max-width:26rem;text-align:center}figure.fr img{width:100%;height:auto;border-radius:6px;border:1px solid var(--line)}figcaption{font-size:.78rem;color:var(--mut);margin-top:.3rem}button.vers{display:block;margin:1rem auto .2rem;padding:.55rem 1.4rem .6rem;text-align:center;cursor:pointer;color:#2b1d10;background:radial-gradient(ellipse at 50% 40%,#f3e6c8,#e3cf9f);border:1px solid #2b1d10;outline:3px double #2b1d10;outline-offset:-6px;border-radius:3px;box-shadow:0 1px 0 #fff8 inset,0 2px 4px #0004;font-family:Georgia,'Times New Roman',serif}
 button.vers .t{display:block;font-variant:small-caps;letter-spacing:.22em;font-size:1.05rem;font-weight:bold}
-button.vers .t:before{content:"\\2766  "}button.vers .t:after{content:"  \\2766"}
-button.vers .s{display:block;font-style:italic;font-size:.88rem;margin-top:.1rem}
+button.vers .s:before{content:"\\2766  "}button.vers .s:after{content:"  \\2766"}
+button.vers .s{display:block;font-style:italic;font-size:1.02rem}
 button.vers:hover,button.vers:focus{background:radial-gradient(ellipse at 50% 40%,#2b1d10,#4a3320);color:#f3e6c8}
 .vmsg{text-align:center;font-size:.8rem;color:var(--mut);min-height:1.1em}
 a{color:var(--cor)}ul.c{columns:2;padding-left:1.1rem}.mut{color:var(--mut)}
@@ -51,7 +51,7 @@ def _entrada(e,capa,imagen_url):
     pr=("Traduce al español, con precisión jurídica, esta entrada del léxico latino de Brisson (De verborum quae ad ius pertinent significatione, ed. Heineccio, Halle 1743; texto de OCR, puede tener errores). "
         "Mantén las citas completas, conserva la distinción entre Brisson y las notas de Heineccio y señala las palabras dudosas.\n\nEntrada: "+e['hw']+f" (p. {e['page']} del PDF)\n\n"
         +"\n\n".join(lab[s['k']]+' '+plain(s['t']) for s in e['segs']))
-    out.append("<button type='button' class='vers' onclick='pedir(this)' data-p='"+html.escape(pr,quote=True)+"'><span class='t'>Traduce</span><span class='s'>Versionem Hispanicam mihi da!</span></button><div class='vmsg'></div>")
+    out.append("<button type='button' class='vers' onclick='pedir(this)' data-p='"+html.escape(pr,quote=True)+"'><span class='s'>Versionem Hispanicam mihi da!</span></button><div class='vmsg'></div>")
     out.append("</article>");return ''.join(out)
 PREF="""<details id="pref"><summary>Disertación del comienzo: Praefatio nova de J. H. Boehmer (De interpretationis grammaticae fatis et usu vario in iure Romano)</summary><div id="prefbox"><p class="mut">Cargando…</p><noscript><p><a href="/prefacio">Abrir el texto en una página aparte</a></p></noscript></div></details>
 <script>document.getElementById('pref').addEventListener('toggle',function(){if(this.open&&!this.dataset.ok){this.dataset.ok=1;fetch('/prefacio?fragmento=1').then(function(r){return r.text()}).then(function(h){document.getElementById('prefbox').innerHTML=h}).catch(function(){document.getElementById('prefbox').innerHTML='<p><a href="/prefacio">Abrir en página aparte</a></p>'})}})</script>"""
