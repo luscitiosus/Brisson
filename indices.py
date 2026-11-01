@@ -80,8 +80,8 @@ def montar(mcp,D,pagina,AUT,RXA):
             if len(idx)<=150: return HTMLResponse(tabla(idx))
             g={}
             for i in idx: g.setdefault(re.sub(r'[^A-Z]','',D[i]['hw'].upper())[:2],[]).append(i)
-            return HTMLResponse(''.join(f"<details><summary>{html.escape(k)} <span class='mut'>({len(v)})</span></summary>{tabla(v)}</details>" for k,v in sorted(g.items())))
-        det=''.join(f"<details class='ab' data-l='{k}' data-u='/tabula'><summary>{k} <span class='mut'>({len(LET[k])})</span></summary><div class='bx'></div></details>" for k in LETRAS)
+            return HTMLResponse(''.join(f"<details><summary>{html.escape(k)} <span class='mut'>({len(v)}) · {html.escape(D[v[0]]['hw'])} – {html.escape(D[v[-1]]['hw'])}</span></summary>{tabla(v)}</details>" for k,v in sorted(g.items())))
+        det=''.join(f"<details class='ab' data-l='{k}' data-u='/tabula'><summary>{k} <span class='mut'>({len(LET[k])}) · {html.escape(D[LET[k][0]]['hw'])} – {html.escape(D[LET[k][-1]]['hw'])}</span></summary><div class='bx'></div></details>" for k in LETRAS)
         js="<script>document.querySelectorAll('details.ab[data-u]').forEach(function(d){d.addEventListener('toggle',function(){if(d.open&&!d.dataset.ok){d.dataset.ok=1;fetch(d.dataset.u+'?letra='+d.dataset.l+'&fragmento=1').then(function(r){return r.text()}).then(function(h){d.querySelector('.bx').innerHTML=h})}})})</script>"
         return HTMLResponse(pagina(f"<h2>Tabula vocum</h2><p class='mut'>Todas las voces, letra por letra, con página, número de leyes citadas y autores más citados. Pulsa una letra.</p>"+det+js,'','ambas','entrada'))
     def tit_nombre(src,b,t):

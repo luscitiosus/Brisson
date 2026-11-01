@@ -164,12 +164,12 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
                 return HTMLResponse("<ul class='c'>"+''.join(f"<li><a href='/entrada?n={i}'>{html.escape(D[i]['hw'])}</a></li>" for i in idx)+"</ul>")
             g={}
             for i in idx: g.setdefault(re.sub(r'[^A-Z]','',D[i]['hw'].upper())[:2],[]).append(i)
-            return HTMLResponse(''.join(f"<details><summary>{html.escape(k)} <span class='mut'>({len(v)})</span></summary><ul class='c'>"+''.join(f"<li><a href='/entrada?n={i}'>{html.escape(D[i]['hw'])}</a></li>" for i in v)+"</ul></details>" for k,v in sorted(g.items())))
+            return HTMLResponse(''.join(f"<details><summary>{html.escape(k)} <span class='mut'>({len(v)}) · {html.escape(D[v[0]]['hw'])} – {html.escape(D[v[-1]]['hw'])}</span></summary><ul class='c'>"+''.join(f"<li><a href='/entrada?n={i}'>{html.escape(D[i]['hw'])}</a></li>" for i in v)+"</ul></details>" for k,v in sorted(g.items())))
         if l in LET:
             idx=LET[l]
             cuerpo=abc()+f"<h2>Littera {l} <span class='mut'>({len(idx)} voces)</span></h2><div id='fr'><p class='mut'>Cargando…</p></div><script>fetch('/indice?letra={l}&fragmento=1').then(function(r){{return r.text()}}).then(function(h){{document.getElementById('fr').innerHTML=h}})</script>"
             return HTMLResponse(pagina(cuerpo,'','ambas','entrada'))
-        det=''.join(f"<details class='ab' data-l='{k}'><summary>{k} <span class='mut'>({len(LET[k])})</span></summary><div class='bx'></div></details>" for k in LETRAS)
+        det=''.join(f"<details class='ab' data-l='{k}'><summary>{k} <span class='mut'>({len(LET[k])}) · {html.escape(D[LET[k][0]]['hw'])} – {html.escape(D[LET[k][-1]]['hw'])}</span></summary><div class='bx'></div></details>" for k in LETRAS)
         js="<script>document.querySelectorAll('details.ab').forEach(function(d){d.addEventListener('toggle',function(){if(d.open&&!d.dataset.ok){d.dataset.ok=1;fetch('/indice?letra='+d.dataset.l+'&fragmento=1').then(function(r){return r.text()}).then(function(h){d.querySelector('.bx').innerHTML=h})}})})</script>"
         return HTMLResponse(pagina(f"<p class='mut'>{len(D)} voces. Elige una letra o despliégala aquí abajo.</p>"+abc()+det+js,'','ambas','entrada'))
     @mcp.custom_route("/portada.jpg",methods=["GET"])
