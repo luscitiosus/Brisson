@@ -264,7 +264,7 @@ def _lexpanel(hw):
         if fam: h.append("<p class='mut'><b>Familia l\u00e9xica</b> en Brisson (misma ra\u00edz): "+' '.join(f"<a href='/entrada?n={i}'>{html.escape(_D[i]['hw'])}</a>" for i in fam[:40])+(" \u2026" if len(fam)>40 else '')+"</p>")
     except Exception: pass
     h.append(f"<p class='mut'>Lewis &amp; Short, <i>A Latin Dictionary</i> (1879), y Lewis, <i>An Elementary Latin Dictionary</i> (1890), en la edici\u00f3n digital de la Perseus Digital Library (<a href='https://github.com/PerseusDL/lexica' target='_blank' rel='noopener'>PerseusDL/lexica</a>, CC BY-SA 4.0). Las entradas se ordenan poniendo primero las de sentido jur\u00eddico; \u2696 marca los sentidos con vocabulario jur\u00eddico. La voz se ha buscado por su lema probable; comp\u00e1rala con el texto de Brisson.</p>")
-    return f"<details class='lxp'><summary>Lexica: Lewis &amp; Short <small class='mut'>(s.v. {html.escape(lss[0]['k'] if lss else v['el'][0]['k'])})</small></summary>"+''.join(h)+"</details>"
+    return f"<details class='lxp'><summary>Lexica: Lewis &amp; Short <small class='mut'>(s.v. {html.escape(lss[0]['k'] if lss else v['el'][0]['k'])})</small></summary>"+''.join(h)+f"<p><a href='/lexicon?l={k}'>Abrir el lema <i>{html.escape(k)}</i> en p\u00e1gina aparte</a></p></details>"
 def _entrada(e,capa,imagen_url,i=None):
     nT=sum(1 for s in e['segs'] if s['k']=='T');ng=e.get('ngr',0)
     out=[f"<article><h2>{html.escape(e['hw'])}</h2><div class='meta'>p. {e['page']} del PDF · "
@@ -345,6 +345,19 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
     _XIIES={}
     try: _XIIES.update(_j.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'datos','xii_es.json'),encoding='utf-8')))
     except Exception: pass
+    @mcp.custom_route("/lexicon",methods=["GET"])
+    async def lexicon(request):
+        import lexica
+        l=lexica.norm(request.query_params.get('l',''));L=lexica.cargar();v=L.get(l) if not l.startswith('_') else None
+        if not v: return HTMLResponse(pagina("<article><h2>Lemma non inuentum</h2><p><a href='javascript:history.back()'>&#9756; Redi</a></p></article>",'','ambas','entrada'),status_code=404)
+        h=[f"<article><h2>{html.escape(l)}</h2><div class='meta'>Lewis &amp; Short \u00b7 Elementary Latin Dictionary (Perseus, CC BY-SA 4.0)</div>"]
+        for x in v.get('el',[]): h.append(f"<p lang='en'><b>Elementary</b> <i>{html.escape(x['k'])}</i>: {x['t']}</p>")
+        for x in sorted(v.get('ls',[]),key=lambda x:-len(_LSJ.findall(re.sub(r'<[^>]+>','',x['t'])))):
+            h.append(f"<p lang='en'><b>Lewis &amp; Short</b> <i>{html.escape(x['k'])}</i></p><div class='lxp'><div class='lsx' lang='en'>{_lsbloque(x)}</div></div>")
+        ids=[i for i,e in enumerate(_D) if lexica.buscar(e['hw'])[0]==l]
+        if ids: h.append("<p class='mut'>Voces de Brisson con este lema: "+' '.join(f"<a href='/entrada?n={i}'>{html.escape(_D[i]['hw'])}</a>" for i in ids)+"</p>")
+        h.append("<p><a href='javascript:history.back()'>&#9756; Redi</a></p></article>")
+        return HTMLResponse(pagina(''.join(h),'','ambas','entrada'))
     @mcp.custom_route("/tabulae",methods=["GET"])
     async def tabulae(request):
         if not _XII: return HTMLResponse(pagina("<p>Texto no disponible.</p>",'','ambas','entrada'),status_code=404)

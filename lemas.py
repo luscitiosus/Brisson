@@ -9,8 +9,8 @@ def variantes(n):
     for a,b in ASIM:
         if n.startswith(a) and len(n)>len(a)+2: v.append(b+n[len(a):])
     return v
-OBL=['ionibus','ionum','ionem','ionis','iones','ione','ibus','orum','arum','ntium','ntibus','ntis','ntem','ntes','nte','tatis','tatem','tates','tate','ium','ibus','is','es','em','um','os','as','am','ae','ei','ui','us','i','e','a','o','u']
-LE=['us','a','um','er','ir','is','e','es','s','x','o','io','or','as','ns','men','al','ar','ex','ps','t','tas','tus','tio','sio','ia','ium','ius','eus','ator','trix','tor','c','l','r','n','ans','ens','ex','ix','ax','ox','ux','ur']
+OBL=['ia','ionibus','ionum','ionem','ionis','iones','ione','ibus','orum','arum','ntium','ntibus','ntis','ntem','ntes','nte','tatis','tatem','tates','tate','ium','ibus','is','es','em','um','os','as','am','ae','ei','ui','us','i','e','a','o','u']
+LE=['','us','a','um','er','ir','is','e','es','s','x','o','io','or','as','ns','men','al','ar','ex','ps','t','tas','tus','tio','sio','ia','ium','ius','eus','ator','trix','tor','c','l','r','n','ans','ens','ex','ix','ax','ox','ux','ur']
 VERB=['abatur','abantur','abat','abant','abit','abunt','atur','antur','ant','at','aret','arent','aui','auit','auerunt','atus','ata','atum','ati','atae','atos','atis','ando','andi','endi','endo','ent','et','ebat','ebant','ebit','ui','uit','uerunt','itus','ita','itum','iti','it','unt','untur','itur','imus','amus','emus','tur','nt','t','antis','antes','ans','entis','entes','ens','iendi','iens','ientis','iat','ias','ere','ari','eri','iri','are','ire']
 VL=['o','eo','io','or','eor','ior','sco','scor']
 def _esp(st):
