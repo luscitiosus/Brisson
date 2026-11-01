@@ -94,6 +94,15 @@ def _vid(t):
     out.append(t[pos:]);return ''.join(out)
 _FUENTES=[None]
 _LEXS=[]
+_XIIRX=re.compile(r"(?<![A-Za-z\u00e6])((?:XII|X\s?II|XIL|Xll|XI I|duodecim|Duodecim|DUODECIM)\.?\s*[Tt]ab[a-z]{0,10}\.?(?:\s*(?:[Tt]ab\.?\s*)?([IVX]{1,4})(?![A-Za-z]))?)")
+_XIIN={'I':1,'II':2,'III':3,'IV':4,'V':5,'VI':6,'VII':7,'VIII':8,'IX':9,'X':10,'XI':11,'XII':12}
+def _xiil(t):
+    def f(m):
+        txt=m.group(1)
+        if txt.count(I0)!=txt.count(I1): return m.group(0)
+        n=_XIIN.get(m.group(2) or '')
+        return f'<a class="ref" href="/tabulae{"#t"+str(n) if n else ""}" title="Leer el texto de las XII Tablas">'+txt.replace(I0,'').replace(I1,'')+'</a>'
+    return _XIIRX.sub(f,t)
 _AUC={}      # clave de autor -> {'t':título,'p':{'libro.cap':texto}}
 _AURX=[None]
 _AUTNOM={'Gellius':'gellius','Plinius':'plinius','Liuius':'livius','Valerius Maximus':'valerius','Quintilianus':'quintilianus','Columella':'columella','Vitruuius':'vitruvius','Curtius':'curtius'}
@@ -170,7 +179,7 @@ def _ps(t):
         return f'<a class="ref" href="/fons?r=PS.{b}.{m.group(3)}" title="Pauli Sententiae {b}.{m.group(3)}: texto latino (BIA)">'+re.sub('[\ue000\ue001]','',m.group(0))+'</a>'
     return _RPS.sub(f,t)
 def _fmt(t):
-    t=_autl(_lexl(_ps(html.escape(_vid(t)))))
+    t=_xiil(_autl(_lexl(_ps(html.escape(_vid(t))))))
     t=re.sub(r'\[((?:D|C|CTh|I|N)\.[^\]]*)\]',_refl,t)
     t=t.replace('⟦griego⟧','<span class="gr" title="griego ilegible en el OCR: mira la imagen de la página">⟦griego⟧</span>')
     res=[];d=0
@@ -277,6 +286,19 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
     import indices
     indices.montar(mcp,D,pagina,_AUT,_RXA)
     _aut_cargar(_AUT)
+    _XII={}
+    try: _XII.update(_j.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'datos','xii.json'),encoding='utf-8')))
+    except Exception: pass
+    @mcp.custom_route("/tabulae",methods=["GET"])
+    async def tabulae(request):
+        if not _XII: return HTMLResponse(pagina("<p>Texto no disponible.</p>",'','ambas','entrada'),status_code=404)
+        h=["<article class='txs'><h2>Duodecim Tabularum leges</h2><div class='meta'>Ley de las Doce Tablas, mediados del siglo V a. C.</div><p class='mut'>El texto original no se conserva: se reconstruye a partir de citas de autores posteriores (Livio, Cicer\u00f3n, Gayo, Gellius\u2026). Los pasajes entre par\u00e9ntesis son testimonios de esos autores. Los puntos suspensivos marcan lagunas y &lt;lo as\u00ed&gt; lo a\u00f1adido por los editores.</p><p class='sg'>"+' '.join(f"<a href='#t{n}'>{n}</a>" for n in range(1,13))+"</p>"]
+        for n in range(1,13):
+            h.append(f"<h3 id='t{n}'>Tabula {n}</h3>")
+            for b in _XII.get(str(n),[]):
+                h.append(f"<p lang='la'{' class=\"mut\"' if b['x'] else ''}>{html.escape(b['t'])}</p>")
+        h.append("<p class='mut'>Texto: The Latin Library (dominio p\u00fablico), <i>Duodecim Tabularum leges</i>. Para la edici\u00f3n cr\u00edtica de Bruns (<i>Fontes iuris Romani antiqui</i>, 1909) usa el conector de fuentes romanas.</p><p><a href='javascript:history.back()'>&#9756; Redi ad vocem</a></p></article>")
+        return HTMLResponse(pagina(''.join(h),'','ambas','entrada'))
     @mcp.custom_route("/textus",methods=["GET"])
     async def textus(request):
         a=request.query_params.get('a','');l=request.query_params.get('l','');c=request.query_params.get('c','')
@@ -341,6 +363,12 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
                         if n: vs[i]+=n
                 tmp[x['id']]=vs.most_common()
             _LEXV.update(tmp)
+        vx=collections.Counter()
+        for i,e in enumerate(D):
+            for sg in e['segs']:
+                n=len(_XIIRX.findall(sg['t'].replace(I0,'').replace(I1,'')))
+                if n: vx[i]+=n
+        cuerpo.append(f"<div class='lx' id='xii'><h3>Lex duodecim tabularum (Doce Tablas)</h3><div class='meta'>lex \u00b7 {sum(vx.values())} menci\u00f3n(es) en {len(vx)} voz(es)</div><p>Ley redactada a mediados del siglo V a. C. por decenviros patricios, tras la presi\u00f3n del tribuno Terentilio Arsa y el estudio de leyes griegas. Reguló procesos civiles, familia y sucesiones, obligaciones y propiedad, derecho penal y normas religiosas. No se conserva el original, solo citas de autores posteriores como Livio, Cicer\u00f3n o Gayo.</p><p class='mut'>Fuente: <a href='https://es.wikipedia.org/wiki/Ley_de_las_Doce_Tablas' target='_blank' rel='noopener'>Wikipedia: Ley de las Doce Tablas</a> \u00b7 <a href='/tabulae'>Texto latino de las XII Tablas</a></p><p class='vs' lang='la'>"+' '.join(f"<a href='/entrada?n={i}'>{html.escape(D[i]['hw'])}</a>" for i,_ in vx.most_common(40))+"</p></div>")
         for x,con,sin in _LEXS:
             vs=collections.Counter(dict(_LEXV.get(x['id'],[])))
             fu=' \u00b7 '.join(f"<a href='{html.escape(f['u'])}'"+(" target='_blank' rel='noopener'" if f['u'].startswith('http') else '')+f">{html.escape(f['t'])}</a>" for f in x['fuentes'])
