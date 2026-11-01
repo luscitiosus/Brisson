@@ -21,13 +21,14 @@ article h2{font-size:1.25rem;margin:.8rem 0 .1rem}.meta{color:var(--mut);font-si
 .T .tag{color:var(--hein)}.C .tag{color:var(--cor)}
 .gr{background:var(--line);padding:0 .3em;border-radius:3px;font-size:.85em}
 .ref{color:var(--cor);font-size:.9em}
-a{color:var(--cor)}ul.c{columns:2;padding-left:1.1rem}.mut{color:var(--mut)}
+i{font-style:italic}a{color:var(--cor)}ul.c{columns:2;padding-left:1.1rem}.mut{color:var(--mut)}
 footer{margin-top:2rem;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8rem}
 @media(max-width:480px){body{font-size:17px}ul.c{columns:1}}
 """
 def _fmt(t):
     t=html.escape(t)
     t=re.sub(r'\[((?:D|C|I|N)\.[^\]]*)\]',r'<span class="ref">[\1]</span>',t)
+    t=t.replace('\ue000','<i>').replace('\ue001','</i>')
     return t.replace('⟦griego⟧','<span class="gr" title="griego ilegible en el OCR: mira la imagen de la página">⟦griego⟧</span>')
 def _entrada(e,capa,imagen_url):
     nT=sum(1 for s in e['segs'] if s['k']=='T');ng=e.get('ngr',0)
@@ -38,7 +39,7 @@ def _entrada(e,capa,imagen_url):
         k=s['k']
         if capa=='brisson' and k!='B' or capa=='heineccio' and k!='T' or capa=='corchetes' and k!='C': continue
         tag={'T':'Tramo que termina en HEIN. (nota de Heineccio)','B':'Brisson','C':'Entre corchetes en la edición'}[k]
-        out.append(f"<div class='seg {k}'><span class='tag'>{tag}</span>{_fmt(s['t'])}</div>")
+        out.append(f"<div class='seg {k}'><span class='tag'>{tag}</span>{_fmt(s.get('h',s['t']))}</div>")
     out.append("</article>");return ''.join(out)
 def pagina(cuerpo,q='',capa='ambas',modo='entrada'):
     sel=lambda v,x:' checked' if v==x else ''

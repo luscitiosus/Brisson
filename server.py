@@ -17,6 +17,10 @@ async def healthz(request):
     from starlette.responses import PlainTextResponse
     return PlainTextResponse("ok")
 D=json.load(open(os.path.join(HERE,'brisson.json'),encoding='utf-8'))
+for _e in D:
+    for _s in _e['segs']:
+        if '\ue000' in _s['t']:
+            _s['h']=_s['t'];_s['t']=_s['t'].replace('\ue000','').replace('\ue001','')
 BY={}
 for i,e in enumerate(D): BY.setdefault(e['key'],[]).append(i)
 KEYS=sorted(BY)
