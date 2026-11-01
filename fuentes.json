@@ -68,7 +68,7 @@
 "Curt": "Curtius",
 "Gothofr": "Gothofredus",
 "Gothof": "Gothofredus",
-"Alciat": "Alciatus",
+"Alciat": "Andreas Alciatus",
 "Brisson": "Brissonius",
 "Hotom": "Hotomanus",
 "Duaren": "Duarenus",
@@ -125,5 +125,9 @@
 "Gronouius": "Iohannes Fridericus Gronouius",
 "Heins": "Nicolaus Heinsius",
 "Burmann": "Petrus Burmannus",
-"Rittershus": "Conradus Rittershusius"
+"Rittershus": "Conradus Rittershusius",
+"Alciatus": "Andreas Alciatus",
+"Alciati": "Andreas Alciatus",
+"Gentil": "Scipio Gentilis",
+"Sciopp": "Caspar Scioppius"
 }

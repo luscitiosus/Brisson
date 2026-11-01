@@ -94,6 +94,27 @@
   "Claud. Salmas.": "Claudius Salmasius (Saumaise), Notae ad Scriptores Historiae Augustae / Exercitationes Plinianae / De modo usurarum",
   "Var. Lect.": "«Variae Lectiones» (de Pancirolo, Muret, Raevardo…), NO Varrón: «Var.» ya no se mapea a Varro",
   "Nonius Marcellus": "una sola persona",
-  "Sextus Pompeius Festus": "una sola persona"
- }
+  "Sextus Pompeius Festus": "una sola persona",
+  "Parerg.": "«Parerg.» (Parerga/Parergon) es el título de obras de varios: Alciato (Parergon iuris), Scipio Gentilis; mira quién la cita en cada caso"
+ },
+ "Andreas Alciatus": {
+  "Parerg": "Parergon iuris libri (Parerga)",
+  "Dispunct": "Dispunctiones",
+  "Praetermiss": "Praetermissa",
+  "Paradox": "Paradoxa",
+  "Emblem": "Emblemata",
+  "Respons": "Responsa"
+ },
+ "Alciatus": {
+  "Parerg": "Parergon iuris libri (Parerga)",
+  "Dispunct": "Dispunctiones",
+  "Praetermiss": "Praetermissa",
+  "Paradox": "Paradoxa",
+  "Emblem": "Emblemata",
+  "Respons": "Responsa"
+ },
+ "Scipio Gentilis": {
+  "Parerg": "Parergon libri (Parerga)"
+ },
+ "Caspar Scioppius": {}
 }
