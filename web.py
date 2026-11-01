@@ -31,11 +31,39 @@ a{color:var(--cor)}ul.c{columns:2;padding-left:1.1rem}.mut{color:var(--mut)}
 footer{margin-top:2rem;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8rem}
 @media(max-width:480px){body{font-size:17px}ul.c{columns:1}}
 """
+I0,I1='\ue000','\ue001'
+_VID=re.compile(r"(?<![A-Za-zæœ])[Vv]id(?:e\b|\.)")
+_OKTOK=re.compile(r"^(?:[A-ZÆŒ][A-Za-zæœ]{0,12}\.,?|[A-ZÆŒ]{3,}[.,]?|[IVXLCDM]{1,7}(?:\.[IVXLCDM]{1,7})?[.,]?|\d+[.,;]?|[a-z]{1,4}\.,?|[a-z]{1,4}\.\d+[.,;]?|§\.?\d*[.,]?|infra|supra|seq\.|sqq?\.)$")
+_STOPW={'et','vel','vt','id','est','quae','quod','sed','de','in','cum','ad'}
+def _vid(t):
+    """Tras «vid.»/«vide» viene una cita: la pongo en cursiva hasta la primera palabra que ya no lo parece."""
+    out=[];pos=0
+    for m in _VID.finditer(t):
+        if m.start()<pos: continue
+        i=m.end();n=0;end=i
+        for tm in re.finditer(r"\s+(\S+)",t[i:]):
+            tok=tm.group(1).strip(I0+I1)
+            if tok.lower().rstrip('.,;') in _STOPW or not _OKTOK.match(tok): break
+            end=i+tm.end();n+=1
+            if n>=12 or tok.endswith(('.',)) and False: break
+        if end>i:
+            out.append(t[pos:m.start()]+I0+t[m.start():end]+I1);pos=end
+    out.append(t[pos:]);return ''.join(out)
 def _fmt(t):
-    t=html.escape(t)
+    t=html.escape(_vid(t))
     t=re.sub(r'\[((?:D|C|I|N)\.[^\]]*)\]',r'<span class="ref">[\1]</span>',t)
-    t=t.replace('\ue000','<i>').replace('\ue001','</i>')
-    return t.replace('⟦griego⟧','<span class="gr" title="griego ilegible en el OCR: mira la imagen de la página">⟦griego⟧</span>')
+    t=t.replace('⟦griego⟧','<span class="gr" title="griego ilegible en el OCR: mira la imagen de la página">⟦griego⟧</span>')
+    res=[];d=0
+    for ch in t:
+        if ch==I0:
+            if d==0: res.append('<i>')
+            d+=1
+        elif ch==I1:
+            if d==1: res.append('</i>')
+            d=max(0,d-1)
+        else: res.append(ch)
+    if d>0: res.append('</i>')
+    return ''.join(res)
 def _entrada(e,capa,imagen_url):
     nT=sum(1 for s in e['segs'] if s['k']=='T');ng=e.get('ngr',0)
     out=[f"<article><h2>{html.escape(e['hw'])}</h2><div class='meta'>p. {e['page']} del PDF · "
