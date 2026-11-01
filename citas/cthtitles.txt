@@ -1,0 +1,330 @@
+1.1|de constitutionibus principum et edictis
+1.2|de diversis rescriptis
+1.3|de mandatis principum
+1.4|de responsis prudentium
+1.5|de officio praefectorum praetorio
+1.6|de officio praefecti urbis
+1.7|de officio magistri militum
+1.8|de officio quaestoris
+1.9|de officio magistri officiorum
+1.10|de officio comitis sacrarum largitionum
+1.11|de officio comitis rei privatae
+1.12|de officio proconsulis et legati
+1.13|de officio comitis orientis
+1.14|de officio praefecti augustalis
+1.15|de officio vicarii
+1.16|de officio rectoris provinciae
+1.17|de officio rationalis summarum et rei privatae
+1.18|de officio praefecti vigilum
+1.19|de officio tribuni voluptatum
+1.20|de officio iudicum civilium
+1.21|de officio iudicum militarium
+1.22|de officio iudicum omnium
+1.27|de episcopali definitione
+1.28|de defensoribus senatus
+1.29|de defensoribus civitatum
+1.30|de curatoribus civitatum
+1.31|de administratiunculis intra urbem
+1.32|de procuratoribus gynaecei et metallorum
+1.33|de primiceriis
+1.34|de adsessoribus domesticis et cancellariis
+2.1|de iurisdictione et ubi quis conveniri debeat
+2.2|ne in sua causa quis iudicet
+2.3|de omissa actionis impetratione
+2.4|de denuntiatione vel editione rescripti
+2.5|de dominio rei quae poscitur vel consortibus
+2.6|de temporum cursu et reparationibus denuntiationum
+2.7|de dilationibus
+2.8|de feriis
+2.9|de pactis et transactionibus
+2.10|de postulando
+2.11|de erroribus advocatorum
+2.12|de cognitoribus et procuratoribus
+2.13|de actionibus ad potentes translatis
+2.14|de his qui potentiorum nomina in lite praetendunt
+2.15|de dolo malo
+2.16|de integri restitutione
+2.17|de his qui veniam aetatis impetrarunt
+2.18|de iudiciis
+2.19|de inofficioso testamento
+2.20|de inofficiosis donationibus
+2.21|de inofficiosis dotibus
+2.22|de hereditatis petitione
+2.23|de rei vindicatione
+2.24|de familiae herciscundae
+2.25|de communi dividundo
+2.26|de finium regundorum
+2.27|si certum petatur de chirographis
+2.28|de pecuniae sequestratione prohibita
+2.29|si certum petatur de suffragiis
+2.30|de pigneribus
+2.31|quod iussu
+2.32|de peculio
+2.33|de usuris
+3.1|de contrahenda emptione
+3.2|de commissoria rescindenda
+3.3|de patribus qui filios distraxerunt
+3.4|de aediliciis actionibus
+3.5|de sponsalibus et ante nuptias donationibus
+3.6|si provinciae rector vel ad eum pertinentes sponsalia dederint
+3.7|de nuptiis
+4.1|de cretione vel bonorum possessione
+4.2|unde liberi
+4.3|de carboniano edicto
+4.4|de testamentis et codicillis
+4.5|de litigiosis
+4.6|de naturalibus filiis et matribus eorum
+4.7|de manumissionibus in ecclesia
+4.8|de liberali causa
+4.9|de his qui non a domino manumissi sunt
+4.10|de libertis et eorum liberis
+4.12|ad senatus consultum claudianum
+4.13|de vectigalibus et commissis
+4.14|de actionibus certo tempore finiendis
+4.15|de quinquennii praescriptione
+4.16|de re iudicata
+4.17|de sententiis ex periculo recitandis
+4.18|de fructibus et litis expensis
+4.19|de usuris rei iudicatae
+5.1|de legitimis hereditatibus
+5.2|de bonis decurionum
+5.3|de bonis clericorum et monachorum
+5.6|de bonis militum
+5.7|de postliminio
+5.8|de ingenuis qui tempore tyranni servierunt
+5.9|de expositis
+5.10|de his qui sanguinolentos emptos vel nutriendos acceperint
+5.12|de fundis patrimonialibus et saltuensibus et emphyteuticis
+5.13|de fundis rei privatae et saltibus divinae domus
+5.14|de diversis praediis urbanis et rusticis
+5.15|de omni agro deserto et quando steriles fertilibus imponantur
+5.16|de agricolis et mancipiis dominicis vel fiscalibus
+5.17|de fugitivis colonis inquilinis et servis
+5.18|de inquilinis et colonis
+5.19|ne colonus inscio domino suum alienet peculium
+5.20|de longa consuetudine
+6.1|de dignitatibus
+6.2|de senatoria dignitate
+6.3|de praediis senatorum
+6.4|de praetoribus et quaestoribus
+6.5|ut dignitatum ordo servetur
+6.6|de consulibus praefectis magistris militum et patriciis
+6.7|de praefectis praetorio sive urbis et magistris militum
+6.8|de praepositis sacri cubiculi
+6.9|de quaestoribus magistris officiorum
+6.10|de primicerio et notariis
+6.11|de magistris scriniorum
+6.12|de comitibus consistorianis
+6.13|de comitibus et tribunis scholarum
+6.14|de comitibus rei militaris
+6.15|de comitibus qui illustribus agentibus adsident
+6.16|de comitibus et archiatris sacri palatii
+6.17|de comitibus qui provincias regunt
+6.18|de comitibus vacantibus
+6.19|de consularibus et praesidibus
+6.20|de comitibus ordinis primi artium diversarum
+6.21|de professoribus qui in urbe constantinopolitana docentes
+6.22|de honorariis codicillis
+6.23|de decurionibus et silentiariis
+6.24|de domesticis et protectoribus
+6.25|de praepositis labarum
+6.26|de proximis comitibus dispositionum
+6.27|de agentibus in rebus
+6.28|de principibus agentum in rebus
+6.29|de curiosis
+6.30|de palatinis sacrarum largitionum et rerum privatarum
+6.31|de stratoribus
+6.32|de castrensianis
+6.33|de decanis
+6.34|de mensoribus
+6.35|de privilegiis eorum qui in sacro palatio militarunt
+6.36|de castrensi omnium palatinorum peculio
+6.37|de equestri dignitate
+6.38|de perfectissimatus dignitate
+7.1|de re militari
+7.2|quid probare debeant ad quamcumque militiam venientes
+7.3|quis in gradu praeferatur
+7.4|de erogatione militaris annonae
+7.5|de excoctione et translatione annonarum
+7.6|de militari veste
+7.7|de pascuis
+7.8|de metatis
+7.9|de salgamo hospitibus non praebendo
+7.10|ne quis in palatiis maneat
+7.11|ne comitibus et tribunis lavacra praestentur
+7.12|de commeatu
+7.13|de tironibus
+7.14|de burgariis
+7.15|de terris limitaneis
+7.16|de litorum et itinerum custodia
+7.17|de lusoriis danuvii
+7.18|de desertoribus et occultatoribus eorum
+7.19|de saturianis et subafrensibus
+7.20|de veteranis
+7.21|de testimoniali ex tribunis et protectoribus
+7.22|de filiis militarium apparitorum et veteranorum
+7.23|de oblatione equorum
+7.24|de oblatione votorum
+8.1|de numerariis actuariis scriniariis et exceptoribus
+8.2|de tabulariis logographis et censualibus
+8.3|de privilegiis apparitorum magisteriae potestatis
+8.4|de cohortalibus principibus cornicularis et primipilaribus
+8.5|de cursu publico angariis et parangariis
+8.6|de tractoriis et stativis
+8.7|de diversis officiis et apparitoribus et probatoriis eorum
+8.8|de executoribus et exactionibus
+8.9|de lucris officiorum
+8.10|de concussionibus advocatorum sive apparitorum
+8.11|ne quid publicae laetitiae nuntii ex descriptione
+8.12|de donationibus
+8.13|de revocandis donationibus
+8.14|de ingratis liberis
+8.15|de his quae administrantibus vel publicum officium gerentibus distracta sunt vel donata
+8.16|de infirmandis poenis caelibatus et orbitatis
+8.17|de iure liberorum
+8.18|de maternis bonis et materni generis et cretione sublata
+8.19|de bonis quae filiisfamilias ex matrimonio acquiruntur
+9.1|de accusationibus et inscriptionibus
+9.2|de exhibendis vel transmittendis reis
+10.1|de iure fisci
+10.2|de domibus ad rem privatam pertinentibus distrahendis
+10.3|de locatione fundorum iuris emphyteutici et rei publicae
+10.4|de actoribus et procuratoribus et conductoribus rei privatae
+10.5|qui conductores rei privatae fideiussores exigi non debent
+10.6|de grege dominico
+10.7|de caesarianis
+10.8|de bonis vacantibus
+10.9|de incorporatione
+10.10|de petitionibus et ultro datis et delatoribus
+10.11|de his qui se deferunt
+10.12|si vagum petatur mancipium
+10.13|de petitoribus et desistentibus
+10.14|si petitionis socius sine herede defecerit
+10.15|de advocatis fisci
+10.16|de fisci debitoribus
+10.17|de fide et iure hastae
+10.18|de thesauris
+10.19|de metallis et metallariis
+10.20|de murilegulis et gynaeceariis et monetariis et bastagariis
+10.21|de vestibus holoveris et auratis
+10.22|de fabricensibus
+10.23|de classicis
+10.24|de his qui cum dispensatore contraxerunt
+10.25|de privilegiis domus augustae
+10.26|de conductoribus et hominibus domus augustae
+11.2|tributa in ipsis speciebus inferri
+11.3|sine censu vel reliquis fundum comparari non posse
+11.4|ne collatio per logographos celebretur
+11.5|de indictionibus
+11.6|de superindicto
+11.7|de exactionibus
+11.8|de superexactionibus
+11.9|de distrahendis pignoribus quae tributorum causa tenentur
+11.10|ne operae a collatoribus exigantur
+11.11|ne damna provincialibus infligantur
+11.12|de immunitate concessa
+11.17|de equorum collatione
+11.18|qui a praebitione tironum et equorum excusentur
+11.20|de collatione donatarum vel relevatarum possessionum
+11.21|de collatione aeris
+11.22|ne collationis translatio postuletur
+11.23|de protostasia
+11.24|de patrociniis vicorum
+11.25|de quadrimenstruis brevibus
+11.26|de discussoribus
+11.27|de alimentis quae inopes parentes de publico petere debent
+11.28|de indulgentiis debitorum
+11.29|de relationibus
+11.30|de appellationibus et poenis earum et consultationibus
+11.31|de reparationibus appellationum
+11.32|de secundo lapsu
+11.33|de dilationibus ex consensu
+11.34|de his qui per metum iudicis non appellaverunt
+11.35|si pendente appellatione mors intervenerit
+11.36|quorum appellationes non recipiantur
+11.37|si de momento fuerit appellatum
+11.38|de possessione ab eo qui bis provocaverit transferenda
+11.39|de fide testium et instrumentorum
+12.1|de decurionibus
+12.2|de praebendo salario
+12.3|de praediis et mancipiis curialium sine decreto non alienandis
+12.4|de imponenda lucrativis descriptione
+12.5|quemadmodum munera civilia indicantur
+12.6|de susceptoribus praepositis et arcariis
+12.7|de ponderatoribus et auri inlatione
+12.8|de auri publici prosecutoribus
+12.9|de his quae ex publica collatione inlata sunt non usurpandis
+12.10|ne praefectianus exactoris vel curiosi vel horreorum custodis fungatur officio
+12.11|de curatoribus kalendarii et fideiussoribus eorum
+12.12|de legatis et decretis legationum
+12.13|de auro coronario
+12.14|de irenarchis
+12.15|de centurionibus
+12.16|de mancipibus
+12.17|de his qui numero liberorum vel paupertate excusationem meruerint
+12.18|si curialis relicta civitate rus habitare maluerit
+12.19|de his qui condicionem propriam reliquerunt
+13.1|de lustrali collatione
+13.2|de argenti pretio quod thensauris infertur
+13.3|de medicis et professoribus
+13.4|de excusationibus artificum
+13.5|de naviculariis
+13.6|de praediis naviculariorum
+13.7|de navibus non excusandis
+13.8|ne quid oneri publico imponatur
+13.9|de naufragiis
+13.10|de censu sive adscriptione
+13.11|de censitoribus peraequatoribus et inspectoribus
+14.1|de decuriis urbis romae
+14.2|de privilegiis corporatorum urbis romae
+14.3|de pistoribus et catabolensibus
+14.4|de suariis pecuariis et susceptoribus vini
+14.5|de mancipibus thermarum urbis et subvectione lignorum
+14.6|de calcis coctoribus urbis romae et constantinopolitanae
+14.7|de collegiatis
+14.8|de centonariis et dendroforis
+14.9|de studiis liberalibus urbis romae et constantinopolitanae
+14.10|de habitu quo uti oportet intra urbem
+14.11|quibus militantibus ad urbem non liceat accedere
+14.12|de honoratorum vehiculis
+14.13|de iure italico urbis constantinopolitanae
+14.14|de campo martio urbis romae
+14.15|de canone frumentario urbis romae
+14.16|de frumento urbis constantinopolitanae
+14.17|de annonis civicis et pane gradili
+14.18|de mendicantibus non invalidis
+14.19|de pretio panis ostiensis
+14.20|de pretio piscis
+14.21|de nautis tiberinis
+14.22|de saccariis portus romae
+14.23|de patronis horreorum portuensium
+14.24|de mensis olearis
+14.25|de frumento carthaginiensi
+14.26|de frumento alexandrino
+14.27|de alexandrinae plebis primatibus
+15.1|de operibus publicis
+15.2|de aquaeductu
+15.3|de itinere muniendo
+15.4|de imaginibus imperialibus
+15.5|de spectaculis
+15.6|de maiuma
+15.7|de scaenicis
+15.8|de lenonibus
+15.9|de expensis ludorum
+15.10|de equis curulibus
+15.11|de venatione ferarum
+15.12|de gladiatoribus
+15.13|de usu sellarum
+15.14|de infirmandis his quae sub tyrannis aut barbaris gesta sunt
+15.15|quod armorum usus interdictus est
+16.1|de fide catholica
+16.2|de episcopis ecclesiis et clericis
+16.3|de monachis
+16.4|de his qui super religione contendunt
+16.5|de haereticis
+16.6|ne sanctum baptisma iteretur
+16.7|de apostatis
+16.8|de iudaeis caelicolis et samaritanis
+16.9|ne christianum mancipium iudaeus habeat
+16.10|de paganis sacrificiis et templis
+16.11|de religione

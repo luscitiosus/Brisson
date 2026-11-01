@@ -51,7 +51,7 @@ def _vid(t):
     out.append(t[pos:]);return ''.join(out)
 def _fmt(t):
     t=html.escape(_vid(t))
-    t=re.sub(r'\[((?:D|C|I|N)\.[^\]]*)\]',r'<span class="ref">[\1]</span>',t)
+    t=re.sub(r'\[((?:D|C|CTh|I|N)\.[^\]]*)\]',r'<span class="ref">[\1]</span>',t)
     t=t.replace('⟦griego⟧','<span class="gr" title="griego ilegible en el OCR: mira la imagen de la página">⟦griego⟧</span>')
     res=[];d=0
     for ch in t:
