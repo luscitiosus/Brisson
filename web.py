@@ -140,6 +140,39 @@ def _autl(t):
         if txt.count(I0)!=txt.count(I1): return txt
         return f'<a class="ref" href="/textus?a={c}&amp;l={l}&amp;c={k}" title="Leer el pasaje latino (Perseus)">'+txt.replace(I0,'').replace(I1,'')+'</a>'
     return rx.sub(f,t)
+_SPL=re.compile(r'(<a\b.*?</a>|<[^>]+>)')
+_N=r"([IVXLCDM]{1,8}(?:\s[IVXLCDM]{1,4})?|\d{1,3})"
+_SUETV={'iul':'suet_iul','caes':'suet_iul','aug':'suet_aug','oct':'suet_aug','gct':'suet_aug','tib':'suet_tib','cal':'suet_cal','cai':'suet_cal','clau':'suet_claud','ner':'suet_ner','gal':'suet_galb','oth':'suet_oth','vit':'suet_vit','ves':'suet_vesp','tit':'suet_tit','dom':'suet_dom'}
+def _cn(x): return _rom(re.sub(r'\s','',x))
+def _a_tac(m):
+    g=m.groups();lib=g[0] or g[3];obra=(g[1] or g[2]).lower();cap=g[4]
+    return ('tac_ann' if obra.startswith('ann') else 'tac_hist'),_cn(lib),_cn(cap)
+def _a_suet(m):
+    k=_SUETV.get(m.group(1).lower()[:3]) or _SUETV.get(m.group(1).lower()[:4])
+    return (k,1,_cn(m.group(2))) if k else None
+_AU2=[
+ (re.compile(r"(?<![A-Za-z\u00e6])Tacit(?:us|\.)?\s+(?:in\s+)?(?:lib\.?\s*"+_N+r"\.?,?\s*(Annal|Hist)\w*\.?|(Annal|Hist)\w*\.?\s*lib\.?\s*"+_N+r"\.?,?)\s*[Cc]ap\.?\s*"+_N+r"(?![A-Za-z0-9])"),_a_tac),
+ (re.compile(r"(?<![A-Za-z\u00e6])Sueton(?:ius|\.)?\s+(?:in|m)\s+([A-Z\u00e6][A-Za-z\u00e6]{2,8})\.?,?\s*[Cc]ap\.?,?\s*"+_N+r"(?![A-Za-z0-9])"),_a_suet),
+ (re.compile(r"(?<![A-Za-z\u00e6])(?:Cic(?:ero|\.)?\s+)?lib\.?\s*"+_N+r"\.?\s*de\s+[Ii]nu\w*\.?\s*[Cc]ap\.?\s*"+_N+r"(?![A-Za-z0-9])"),lambda m:('cic_inv',_cn(m.group(1)),_cn(m.group(2)))),
+ (re.compile(r"(?<![A-Za-z\u00e6])(?:Cic(?:ero|\.)?\s+)?de\s+[Oo]ffic\w*\.?\s*lib\.?\s*"+_N+r"\.?,?\s*[Cc]ap\.?\s*"+_N+r"(?![A-Za-z0-9])"),lambda m:('cic_off',_cn(m.group(1)),_cn(m.group(2)))),
+ (re.compile(r"(?<![A-Za-z\u00e6])(?:Cic(?:ero|\.)?\s+)?de\s+[Oo]rat\w*\.?\s*lib\.?\s*"+_N+r"\.?,?\s*[Cc]ap\.?\s*"+_N+r"(?![A-Za-z0-9])"),lambda m:('cic_orat',_cn(m.group(1)),_cn(m.group(2)))),
+ (re.compile(r"(?<![A-Za-z\u00e6])pro\s+domo(?:\s+sua)?\s*[Cc]ap\.?\s*"+_N+r"(?![A-Za-z0-9])"),lambda m:('cic_dom',1,_cn(m.group(1)))),
+ (re.compile(r"(?<![A-Za-z\u00e6])in\s+[Dd]iuinat\w*\.?\s*[Cc]ap\.?\s*"+_N+r"(?![A-Za-z0-9])"),lambda m:('cic_diu',1,_cn(m.group(1)))),
+]
+def _autl2(t):
+    if not _AUC: return t
+    for rx,fn in _AU2:
+        def f(m,fn=fn):
+            try: r=fn(m)
+            except Exception: return m.group(0)
+            if not r or None in r: return m.group(0)
+            c,l,k=r
+            if c not in _AUC or f"{l}.{k}" not in _AUC[c]['p']: return m.group(0)
+            txt=m.group(0)
+            if txt.count(I0)!=txt.count(I1): return txt
+            return f'<a class="ref" href="/textus?a={c}&amp;l={l}&amp;c={k}" title="Leer el pasaje latino (Perseus)">'+txt.replace(I0,'').replace(I1,'')+'</a>'
+        t=''.join(p if i%2 else rx.sub(f,p) for i,p in enumerate(_SPL.split(t)))
+    return t
 _LEXV={}
 _PRE=r"(?:S\.?\s?C\.?|Senatusconsult\w*|[Ll]ex|[Ll]ege|[Ll]egem|[Ll]egis)\s+(?:de\s+)?"
 def _lex_cargar(L):
@@ -151,7 +184,6 @@ def _lex_cargar(L):
             core=rx.replace(r"|Vell\.","")
             sin=re.compile(r"(?<![A-Za-z\u00e6])(?=[A-Za-z\u00e6]*ian)(?:"+core+r")(?<!ianus)(?![A-Za-z\u00e6])")
         _LEXS.append((x,con,sin))
-_SPL=re.compile(r'(<a\b.*?</a>|<[^>]+>)')
 def _lexl(t):
     if not _LEXS: return t
     for x,con,sin in _LEXS:
@@ -179,7 +211,7 @@ def _ps(t):
         return f'<a class="ref" href="/fons?r=PS.{b}.{m.group(3)}" title="Pauli Sententiae {b}.{m.group(3)}: texto latino (BIA)">'+re.sub('[\ue000\ue001]','',m.group(0))+'</a>'
     return _RPS.sub(f,t)
 def _fmt(t):
-    t=_xiil(_autl(_lexl(_ps(html.escape(_vid(t))))))
+    t=_xiil(_autl2(_autl(_lexl(_ps(html.escape(_vid(t)))))))
     t=re.sub(r'\[((?:D|C|CTh|I|N)\.[^\]]*)\]',_refl,t)
     t=t.replace('⟦griego⟧','<span class="gr" title="griego ilegible en el OCR: mira la imagen de la página">⟦griego⟧</span>')
     res=[];d=0
