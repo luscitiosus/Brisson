@@ -77,7 +77,6 @@ def montar(mcp,D,pagina,AUT,RXA):
         l=(request.query_params.get('letra') or '').upper()[:1]
         if request.query_params.get('fragmento') and l in LET:
             idx=LET[l]
-            if len(idx)<=150: return HTMLResponse(tabla(idx))
             g={}
             for i in idx: g.setdefault(re.sub(r'[^A-Z]','',D[i]['hw'].upper())[:2],[]).append(i)
             return HTMLResponse(''.join(f"<details><summary>{html.escape(k)} <span class='mut'>({len(v)}) · {html.escape(D[v[0]]['hw'])} – {html.escape(D[v[-1]]['hw'])}</span></summary>{tabla(v)}</details>" for k,v in sorted(g.items())))

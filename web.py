@@ -166,8 +166,6 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
         l=(request.query_params.get('letra') or '').upper()[:1]
         if request.query_params.get('fragmento') and l in LET:
             idx=LET[l]
-            if len(idx)<=120:
-                return HTMLResponse("<ul class='c'>"+''.join(f"<li><a href='/entrada?n={i}'>{html.escape(D[i]['hw'])}</a></li>" for i in idx)+"</ul>")
             g={}
             for i in idx: g.setdefault(re.sub(r'[^A-Z]','',D[i]['hw'].upper())[:2],[]).append(i)
             return HTMLResponse(''.join(f"<details><summary>{html.escape(k)} <span class='mut'>({len(v)}) · {html.escape(D[v[0]]['hw'])} – {html.escape(D[v[-1]]['hw'])}</span></summary><ul class='c'>"+''.join(f"<li><a href='/entrada?n={i}'>{html.escape(D[i]['hw'])}</a></li>" for i in v)+"</ul></details>" for k,v in sorted(g.items())))
