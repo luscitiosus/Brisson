@@ -4,9 +4,13 @@ from urllib.parse import quote
 from starlette.responses import HTMLResponse
 
 CSS="""
+@font-face{font-family:'Ibarra Real Nova';src:url('/fuente?f=Regular') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Ibarra Real Nova';src:url('/fuente?f=Italic') format('truetype');font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:'Ibarra Real Nova';src:url('/fuente?f=Bold') format('truetype');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'Ibarra Real Nova';src:url('/fuente?f=BoldItalic') format('truetype');font-weight:700;font-style:italic;font-display:swap}
 :root{--bg:#fbf8f1;--fg:#1d1b17;--mut:#6b655a;--line:#ddd5c4;--hein:#8a3b12;--hbg:#f6ebdd;--cor:#1f4e79;--cbg:#e9f0f7;--card:#fffdf8}
 @media(prefers-color-scheme:dark){:root{--bg:#16140f;--fg:#ece6d8;--mut:#a39c8c;--line:#3a352a;--hein:#e3a06b;--hbg:#2a2117;--cor:#8fbbe3;--cbg:#16222e;--card:#1c1912}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:18px/1.55 Georgia,'Times New Roman',serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:19px/1.55 'Ibarra Real Nova',Georgia,'Times New Roman',serif}
 main{max-width:46rem;margin:0 auto;padding:1rem 16px 3rem}
 h1{font-size:1.5rem;margin:.6rem 0 .1rem}.sub{color:var(--mut);font-size:.9rem;margin:0 0 1rem}
 form{display:flex;gap:.5rem;flex-wrap:wrap;margin:.8rem 0}
@@ -34,7 +38,7 @@ abbr.au{text-decoration:underline dotted var(--cor);text-underline-offset:3px;cu
 nav.top a{text-decoration:none;color:var(--fg)}nav.top a:hover{color:var(--hein)}
 .pn2{display:flex;gap:.6rem;margin:1rem 0 .2rem}.pn2 .sp{flex:1}
 a.nv.top{margin-top:.2rem}table.tb{width:100%;border-collapse:collapse;font-size:.88rem}table.tb th,table.tb td{border-bottom:1px solid var(--line);padding:.25rem .35rem;text-align:left;vertical-align:top}table.tb th{font:600 .72rem system-ui,sans-serif;text-transform:uppercase;color:var(--mut)}a.nv{flex:1 1 0;min-width:0;display:block;text-align:center;text-decoration:none;color:#2b1d10;padding:.45rem .5rem .5rem;background:radial-gradient(ellipse at 50% 40%,#f3e6c8,#e3cf9f);border:1px solid #2b1d10;outline:3px double #2b1d10;outline-offset:-5px;border-radius:3px;box-shadow:0 1px 0 #fff8 inset,0 2px 4px #0004;font-variant:small-caps;letter-spacing:.14em;font-size:1rem;font-weight:bold}
-a.nv small{display:block;font:italic .8rem Georgia,serif;letter-spacing:0;font-variant:normal;font-weight:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+a.nv small{display:block;font:italic .8rem 'Ibarra Real Nova',Georgia,serif;letter-spacing:0;font-variant:normal;font-weight:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 a.nv:hover,a.nv:focus{background:radial-gradient(ellipse at 50% 40%,#2b1d10,#4a3320);color:#f3e6c8}
 .abc{display:flex;flex-wrap:wrap;gap:.3rem;justify-content:center;margin:.8rem 0}.abc a{min-width:2.1rem;text-align:center;padding:.25rem .3rem;border:1px solid var(--line);border-radius:4px;background:var(--card);text-decoration:none;font-weight:bold}
 .abc a small{display:block;font:.62rem system-ui,sans-serif;color:var(--mut);font-weight:normal}
@@ -112,7 +116,7 @@ def pagina(cuerpo,q='',capa='ambas',modo='entrada'):
 {cuerpo}
 {PREF}
 {SCRIPT}
-<footer>OCR sin revisar: los números de las citas pueden estar mal leídos y el griego sale como ⟦griego⟧ (consulta la imagen). Capa «Heineccio»: tramo que termina con la firma HEIN. y puede incluir texto de Brisson anterior a la nota. Uso académico; contrasta las citas con las fuentes.</footer></main></body></html>"""
+<footer>OCR sin revisar: los números de las citas pueden estar mal leídos y el griego sale como ⟦griego⟧ (consulta la imagen). Capa «Heineccio»: tramo que termina con la firma HEIN. y puede incluir texto de Brisson anterior a la nota. Tipografía: Ibarra Real Nova (SIL OFL). Uso académico; contrasta las citas con las fuentes.</footer></main></body></html>"""
 def _prefacio(imagen_url):
     import json,os
     P=json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'prefacio.json'),encoding='utf-8'))
@@ -174,6 +178,12 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
         det=''.join(f"<details class='ab' data-l='{k}'><summary>{k} <span class='mut'>({len(LET[k])}) · {html.escape(D[LET[k][0]]['hw'])} – {html.escape(D[LET[k][-1]]['hw'])}</span></summary><div class='bx'></div></details>" for k in LETRAS)
         js="<script>document.querySelectorAll('details.ab').forEach(function(d){d.addEventListener('toggle',function(){if(d.open&&!d.dataset.ok){d.dataset.ok=1;fetch('/indice?letra='+d.dataset.l+'&fragmento=1').then(function(r){return r.text()}).then(function(h){d.querySelector('.bx').innerHTML=h})}})})</script>"
         return HTMLResponse(pagina(f"<p class='mut'>{len(D)} voces. Elige una letra o despliégala aquí abajo.</p>"+abc()+det+js,'','ambas','entrada'))
+    @mcp.custom_route("/fuente",methods=["GET"])
+    async def fuente(request):
+        n=request.query_params.get('f','')
+        if n not in('Regular','Italic','Bold','BoldItalic'): return Response(status_code=404)
+        b=open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'fuentes',f'IbarraRealNova-{n}.ttf'),'rb').read()
+        return Response(b,media_type='font/ttf',headers={'Cache-Control':'public, max-age=604800'})
     @mcp.custom_route("/portada.jpg",methods=["GET"])
     async def portada(request):
         b=open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'portada.jpg'),'rb').read()
