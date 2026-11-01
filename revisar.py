@@ -32,9 +32,12 @@ def ocr1(w):
         for m in re.finditer(re.escape(x),w): out.add(w[:m.start()]+y+w[m.end():])
         for m in re.finditer(re.escape(y),w): out.add(w[:m.start()]+x+w[m.end():])
     return out
-def sugerir(n,sig=None,corto=False):
+def sugerir(n,sig=None,corto=False,ant=None):
     """Candidatos para la forma normalizada n. sig = siguiente palabra normalizada (para uniones)."""
     c=collections.OrderedDict()
+    if ant:
+        j=ant+n
+        if valida(j) and freq(j)>=2: c[j]=('unir con la anterior',freq(j))
     if sig:
         j=n+sig
         if valida(j) and freq(j)>=3: c[j]=('unir con la siguiente',freq(j))
@@ -73,7 +76,8 @@ def revisar_texto(t,D,max_n=60):
         if t2[max(0,m.start()-1):m.start()].isdigit() or fin.isdigit(): continue
         sig=None
         if k+1<len(toks) and toks[k+1].start()-m.end()<=1: sig=norm(toks[k+1].group(0))
-        sg=sugerir(n,sig)
+        ant=norm(toks[k-1].group(0)) if k>0 and m.start()-toks[k-1].end()<=1 else None
+        sg=sugerir(n,sig,ant=ant)
         a=max(0,m.start()-35);b=min(len(t),m.end()+35)
         out.append({'palabra':w,'ctx':re.sub(r'\s+',' ',t[a:b]),'sug':[(forma(s,w),tipo,f) for s,(tipo,f) in sg]})
         if len(out)>=max_n: break
