@@ -6,9 +6,11 @@ _LIG=re.compile(r'ae|AE|Ae|aE')
 def _lig(m):
     x=m.group(0);return 'Æ' if x[0]=='A' else 'æ'
 _SPL=re.compile(r'(<style.*?</style>|<script.*?</script>|<[^>]+>)',re.S)
+_GR=re.compile(r'[\u0370-\u03ff\u1f00-\u1fff]+(?:[ \u0387\u00b7,.;:][\u0370-\u03ff\u1f00-\u1fff]+)*')
+def _tx(x): return _GR.sub(lambda m:'<span class="grc" lang="grc">'+m.group(0)+'</span>',_LIG.sub(_lig,x))
 def lig_html(h):
     p=_SPL.split(h)
-    return ''.join(x if i%2 else _LIG.sub(_lig,x) for i,x in enumerate(p))
+    return ''.join(x if i%2 else _tx(x) for i,x in enumerate(p))
 class HTMLResponse(_HR):
     def __init__(self,content,*a,**k):
         super().__init__(lig_html(content) if isinstance(content,str) else content,*a,**k)
@@ -21,6 +23,8 @@ nav.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:.4rem 0;bor
 .sg{font-size:.9rem;color:var(--mut)}.sg a{margin-right:.8rem}
 #top{position:fixed;right:12px;bottom:12px;background:var(--card);border:1px solid var(--line);border-radius:50%;width:2.4rem;height:2.4rem;text-align:center;line-height:2.3rem;text-decoration:none;opacity:.85}
 .ir{display:flex;gap:.5rem;align-items:center;margin:.6rem 0;font-size:.9rem;color:var(--mut)}.ir input{width:6rem;font:inherit;padding:.3rem .5rem;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg)}
+@font-face{font-family:'GFS Complutum';src:url('/fuente?f=Complutum') format('opentype');font-display:swap}
+.grc{font-family:'GFS Complutum','GFS Porson','Palatino Linotype',serif}
 @font-face{font-family:'Ibarra Real Nova';src:url('/fuente?f=Regular') format('truetype');font-weight:400;font-style:normal;font-display:swap}
 @font-face{font-family:'Ibarra Real Nova';src:url('/fuente?f=Italic') format('truetype');font-weight:400;font-style:italic;font-display:swap}
 @font-face{font-family:'Ibarra Real Nova';src:url('/fuente?f=Bold') format('truetype');font-weight:700;font-style:normal;font-display:swap}
@@ -154,7 +158,7 @@ def pagina(cuerpo,q='',capa='ambas',modo='entrada'):
 {cuerpo}
 {PREF}
 {SCRIPT}
-<footer>OCR sin revisar: los números de las citas pueden estar mal leídos y el griego sale como ⟦griego⟧ (consulta la imagen). Capa «Heineccio»: tramo que termina con la firma HEIN. y puede incluir texto de Brisson anterior a la nota. Tipografía: Ibarra Real Nova (SIL OFL). Uso académico; contrasta las citas con las fuentes.</footer></main></body></html>"""
+<footer>OCR sin revisar: los números de las citas pueden estar mal leídos y el griego sale como ⟦griego⟧ (consulta la imagen). Capa «Heineccio»: tramo que termina con la firma HEIN. y puede incluir texto de Brisson anterior a la nota. Tipografía: Ibarra Real Nova y, para el griego, GFS Complutum (SIL OFL). Uso académico; contrasta las citas con las fuentes.</footer></main></body></html>"""
 def _prefacio(imagen_url):
     import json,os
     P=json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'prefacio.json'),encoding='utf-8'))
@@ -237,6 +241,8 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
     @mcp.custom_route("/fuente",methods=["GET"])
     async def fuente(request):
         n=request.query_params.get('f','')
+        base=os.path.dirname(os.path.abspath(__file__))
+        if n=='Complutum': return Response(open(os.path.join(base,'fuentes','GFSPolyglot.otf'),'rb').read(),media_type='font/otf',headers={'Cache-Control':'public, max-age=604800'})
         if n not in('Regular','Italic','Bold','BoldItalic'): return Response(status_code=404)
         b=open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'fuentes',f'IbarraRealNova-{n}.ttf'),'rb').read()
         return Response(b,media_type='font/ttf',headers={'Cache-Control':'public, max-age=604800'})
