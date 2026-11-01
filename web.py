@@ -33,7 +33,7 @@ footer{margin-top:2rem;font-size:.82rem;color:var(--mut);border-top:1px solid va
 abbr.au{text-decoration:underline dotted var(--cor);text-underline-offset:3px;cursor:help}nav.top{display:flex;gap:.4rem 1.1rem;flex-wrap:wrap;justify-content:center;font-variant:small-caps;letter-spacing:.12em;font-size:1rem;margin:.2rem 0 .6rem;padding:.35rem 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 nav.top a{text-decoration:none;color:var(--fg)}nav.top a:hover{color:var(--hein)}
 .pn2{display:flex;gap:.6rem;margin:1rem 0 .2rem}.pn2 .sp{flex:1}
-a.nv{flex:1 1 0;min-width:0;display:block;text-align:center;text-decoration:none;color:#2b1d10;padding:.45rem .5rem .5rem;background:radial-gradient(ellipse at 50% 40%,#f3e6c8,#e3cf9f);border:1px solid #2b1d10;outline:3px double #2b1d10;outline-offset:-5px;border-radius:3px;box-shadow:0 1px 0 #fff8 inset,0 2px 4px #0004;font-variant:small-caps;letter-spacing:.14em;font-size:1rem;font-weight:bold}
+a.nv.top{margin-top:.2rem}table.tb{width:100%;border-collapse:collapse;font-size:.88rem}table.tb th,table.tb td{border-bottom:1px solid var(--line);padding:.25rem .35rem;text-align:left;vertical-align:top}table.tb th{font:600 .72rem system-ui,sans-serif;text-transform:uppercase;color:var(--mut)}a.nv{flex:1 1 0;min-width:0;display:block;text-align:center;text-decoration:none;color:#2b1d10;padding:.45rem .5rem .5rem;background:radial-gradient(ellipse at 50% 40%,#f3e6c8,#e3cf9f);border:1px solid #2b1d10;outline:3px double #2b1d10;outline-offset:-5px;border-radius:3px;box-shadow:0 1px 0 #fff8 inset,0 2px 4px #0004;font-variant:small-caps;letter-spacing:.14em;font-size:1rem;font-weight:bold}
 a.nv small{display:block;font:italic .8rem Georgia,serif;letter-spacing:0;font-variant:normal;font-weight:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 a.nv:hover,a.nv:focus{background:radial-gradient(ellipse at 50% 40%,#2b1d10,#4a3320);color:#f3e6c8}
 .abc{display:flex;flex-wrap:wrap;gap:.3rem;justify-content:center;margin:.8rem 0}.abc a{min-width:2.1rem;text-align:center;padding:.25rem .3rem;border:1px solid var(--line);border-radius:4px;background:var(--card);text-decoration:none;font-weight:bold}
@@ -76,11 +76,16 @@ def _fmt(t):
     if d>0: res.append('</i>')
     return ''.join(res)
 _D=[]
+def _navbtn(i):
+    a=f"<a class='nv' href='/entrada?n={i-1}'>&#9756; Vox prior<small>{html.escape(_D[i-1]['hw'])}</small></a>" if i>0 else "<span class='sp'></span>"
+    b=f"<a class='nv' href='/entrada?n={i+1}'>Vox posterior &#9758;<small>{html.escape(_D[i+1]['hw'])}</small></a>" if i<len(_D)-1 else "<span class='sp'></span>"
+    return f"<div class='pn2'>{a}{b}</div>"
 def _entrada(e,capa,imagen_url,i=None):
     nT=sum(1 for s in e['segs'] if s['k']=='T');ng=e.get('ngr',0)
     out=[f"<article><h2>{html.escape(e['hw'])}</h2><div class='meta'>p. {e['page']} del PDF · "
          f"<a href='{html.escape(imagen_url(e['page']))}' target='_blank' rel='noopener'>ver la página</a>"
          +(f" · {ng} pasaje(s) en griego" if ng else "")+f" · {nT} tramo(s) con nota de Heineccio</div>"]
+    if i is not None and _D: out.append(_navbtn(i))
     for s in e['segs']:
         k=s['k']
         if capa=='brisson' and k!='B' or capa=='heineccio' and k!='T' or capa=='corchetes' and k!='C': continue
@@ -92,10 +97,7 @@ def _entrada(e,capa,imagen_url,i=None):
         "Mantén las citas completas, conserva la distinción entre Brisson y las notas de Heineccio y señala las palabras dudosas.\n\nEntrada: "+e['hw']+f" (p. {e['page']} del PDF)\n\n"
         +"\n\n".join(lab[s['k']]+' '+plain(s['t']) for s in e['segs']))
     out.append("<button type='button' class='vers' onclick='pedir(this)' data-p='"+html.escape(pr,quote=True)+"'><span class='s'>Versionem Hispanicam mihi da!</span></button><div class='vmsg'></div>")
-    if i is not None and _D:
-        a=f"<a class='nv' href='/entrada?n={i-1}'>&#9756; Vox prior<small>{html.escape(_D[i-1]['hw'])}</small></a>" if i>0 else "<span class='sp'></span>"
-        b=f"<a class='nv' href='/entrada?n={i+1}'>Vox posterior &#9758;<small>{html.escape(_D[i+1]['hw'])}</small></a>" if i<len(_D)-1 else "<span class='sp'></span>"
-        out.append(f"<div class='pn2'>{a}{b}</div>")
+    if i is not None and _D: out.append(_navbtn(i))
     out.append("</article>");return ''.join(out)
 PREF="""<details id="pref"><summary>Disertación del comienzo: Praefatio nova de J. H. Boehmer (De interpretationis grammaticae fatis et usu vario in iure Romano)</summary><div id="prefbox"><p class="mut">Cargando…</p><noscript><p><a href="/prefacio">Abrir el texto en una página aparte</a></p></noscript></div></details>
 <script>document.getElementById('pref').addEventListener('toggle',function(){if(this.open&&!this.dataset.ok){this.dataset.ok=1;fetch('/prefacio?fragmento=1').then(function(r){return r.text()}).then(function(h){document.getElementById('prefbox').innerHTML=h}).catch(function(){document.getElementById('prefbox').innerHTML='<p><a href="/prefacio">Abrir en página aparte</a></p>'})}})</script>"""
@@ -107,7 +109,7 @@ def pagina(cuerpo,q='',capa='ambas',modo='entrada'):
     sel=lambda v,x:' checked' if v==x else ''
     return f"""<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Brisson · léxico jurídico latino</title><style>{CSS}</style></head><body><main>
-<nav class="top"><a href="/">Quaerere</a><a href="/indice">Index vocum</a><a href="/auctores">Auctores</a><a href="/fortuita">Vox fortuita</a></nav>
+<nav class="top"><a href="/">Quaerere</a><a href="/indice">Index vocum</a><a href="/auctores">Auctores</a><a href="/tabula">Tabula</a><a href="/loci">Loci</a><a href="/fortuita">Vox fortuita</a></nav>
 <h1>Brisson, <i>De verborum quae ad ius pertinent significatione</i></h1>
 <p class="sub">Edición de Heineccio (Halle, 1743). Texto de OCR, con Brisson y Heineccio en capas distintas.</p>
 <figure class="fr"><img src="/portada.jpg" alt="Frontispicio grabado de la edición de 1743: retratos de Brisson y de Heineccio" width="900" height="806" loading="lazy"><figcaption>Frontispicio de la edición de 1743 (grabado de G. A. Gründler y Susang): Brisson y Heineccio. Imagen de la ULB Sachsen-Anhalt, Halle.</figcaption></figure>
@@ -157,11 +159,8 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
         n=max(0,min(len(D)-1,n));capa=request.query_params.get('capa','ambas')
         if capa not in('ambas','brisson','heineccio','corchetes'): capa='ambas'
         return HTMLResponse(pagina(_entrada(D[n],capa,imagen_url,n),'',capa,'entrada'))
-    @mcp.custom_route("/auctores",methods=["GET"])
-    async def auctores(request):
-        L=sorted(AC.items(),key=lambda kv:-sum(kv[1].values()))
-        li=''.join(f"<li><b>{html.escape(k)}</b> <span class='mut'>{sum(v.values())} citas en {len(AE[k])} entradas</span><br><small>"+' · '.join(f"<a href='/?q={quote(a)}.&modo=texto'>{html.escape(a)}. ({n})</a>" for a,n in sorted(v.items(),key=lambda x:-x[1])[:6])+"</small></li>" for k,v in L)
-        return HTMLResponse(pagina("<h2>Auctores citati</h2><p class='mut'>Autores y eruditos citados por Brisson y Heineccio, agrupados por la abreviatura del texto (OCR sin revisar). Pulsa una abreviatura para ver sus pasajes.</p><ul>"+li+"</ul>",'','ambas','entrada'))
+    import indices
+    indices.montar(mcp,D,pagina,_AUT,_RXA)
     @mcp.custom_route("/fortuita",methods=["GET"])
     async def fortuita(request):
         return RedirectResponse('/entrada?n='+str(random.choice(BIG)),status_code=302)
