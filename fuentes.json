@@ -5,8 +5,6 @@
 "Seneca": "Seneca",
 "Senec": "Seneca",
 "Varro": "Varro",
-"Var": "Varro",
-"Varron": "Varro",
 "Gell": "Gellius",
 "Gellius": "Gellius",
 "Attic": "Gellius (Noctes Atticae)",
@@ -34,7 +32,7 @@
 "Ifidor": "Isidorus",
 "Virgil": "Vergilius",
 "Iuuenal": "Iuuenalis",
-"Claud": "Claudianus",
+"Claud": "Claudius (Suetonius, Vitae) o Claudius Salmasius: según el contexto",
 "Orig": "Origenes",
 "Aug": "Augustinus",
 "August": "Augustinus",
@@ -132,5 +130,14 @@
 "Rosc": "Cicero (Pro Roscio)",
 "Verr": "Cicero (In Verrem)",
 "Muraena": "Cicero (Pro Murena)",
-"Flacco": "Cicero (Pro Flacco)"
+"Flacco": "Cicero (Pro Flacco)",
+"Salmas": "Claudius Salmasius (Saumaise)",
+"Salmasius": "Claudius Salmasius",
+"Pancirol": "Guido Pancirolus",
+"Muret": "Marcus Antonius Muretus",
+"Raeuard": "Iacobus Raevardus",
+"Casaub": "Isaac Casaubonus",
+"Wouver": "Iohannes Wouwerus",
+"Pignor": "Laurentius Pignorius",
+"Barth": "Caspar Barthius"
 }

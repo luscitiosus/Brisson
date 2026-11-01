@@ -91,9 +91,9 @@
   "Paratitl": "Paratitla"
  },
  "AVISO": {
-  "Claud Salmas": "«Claud. Salmas.» es Claudius Salmasius (Saumaise), no Claudiano",
-  "Nonius Marcell": "Nonius Marcellus es una sola persona",
-  "Festus Pompeius": "Sextus Pompeius Festus es una sola persona",
-  "Varro Lect": "por determinar (¿Lectiones?)"
+  "Claud. Salmas.": "Claudius Salmasius (Saumaise), Notae ad Scriptores Historiae Augustae / Exercitationes Plinianae / De modo usurarum",
+  "Var. Lect.": "«Variae Lectiones» (de Pancirolo, Muret, Raevardo…), NO Varrón: «Var.» ya no se mapea a Varro",
+  "Nonius Marcellus": "una sola persona",
+  "Sextus Pompeius Festus": "una sola persona"
  }
 }
