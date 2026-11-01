@@ -18,14 +18,16 @@ def lineas(pdf,n):
         t=' '.join(re.findall(r'>([^<]+)</word>',m.group(5)))
         L.append((x0,y0,x1,y1,t))
     return pw,ph,L
+UMBRAL=None
 def detecta(img):
     res=[]
     for lado,t,thr,esc in(('izq',TPL,0.70,(0.7,0.8,0.9,1.0)),('der',cv2.flip(TPL,1),0.74,(0.7,0.8,0.9,1.0)),('der',TPD,0.72,(0.8,0.9,1.0,1.1,1.2))):
         for s in esc:
             tt=cv2.resize(t,None,fx=s,fy=s,interpolation=cv2.INTER_AREA)
+            thr_=min(thr,UMBRAL) if UMBRAL else thr
             r=cv2.matchTemplate(img,tt,cv2.TM_CCOEFF_NORMED)
             r=np.nan_to_num(r,nan=0.0,posinf=0.0,neginf=0.0)
-            ys,xs=np.where(r>=thr)
+            ys,xs=np.where(r>=thr_)
             if len(ys)>400:   # página casi uniforme o con trama: quedarse con las mejores coincidencias
                 o=np.argsort(r[ys,xs])[-400:];ys,xs=ys[o],xs[o]
             res+=[(float(r[y,x]),lado,x+tt.shape[1]/2,y+tt.shape[0]/2) for y,x in zip(ys,xs)]
@@ -38,7 +40,8 @@ def pagina(args):
     except Exception as e:
         print('página',args[1],'saltada:',type(e).__name__,e,file=sys.stderr,flush=True);return [{'pagina':args[1],'error':str(e)[:80]}]
 def _pagina(args):
-    pdf,n=args
+    global UMBRAL
+    pdf,n,UMBRAL=args
     with tempfile.TemporaryDirectory() as d:
         subprocess.run(['pdftoppm','-r',str(DPI),'-f',str(n),'-l',str(n),'-gray','-png',pdf,os.path.join(d,'p')],check=True,timeout=90)
         f=[x for x in os.listdir(d) if x.endswith('.png')][0]
@@ -57,7 +60,7 @@ def _pagina(args):
     return out
 if __name__=='__main__':
     ap=argparse.ArgumentParser();ap.add_argument('pdf');ap.add_argument('salida')
-    ap.add_argument('--desde',type=int,default=1);ap.add_argument('--hasta',type=int,default=0);ap.add_argument('--procesos',type=int,default=2)
+    ap.add_argument('--desde',type=int,default=1);ap.add_argument('--hasta',type=int,default=0);ap.add_argument('--procesos',type=int,default=2);ap.add_argument('--umbral',type=float,default=0)
     a=ap.parse_args()
     if not a.hasta:
         info=subprocess.run(['pdfinfo',a.pdf],capture_output=True,text=True).stdout
@@ -70,7 +73,7 @@ if __name__=='__main__':
     par=open(a.salida+'.parcial','a',encoding='utf-8')
     pend=[n for n in range(a.desde,a.hasta+1) if n not in hechas]
     with ProcessPoolExecutor(a.procesos) as ex:
-        for i,o in enumerate(ex.map(pagina,[(a.pdf,n) for n in pend]),0):
+        for i,o in enumerate(ex.map(pagina,[(a.pdf,n,a.umbral or None) for n in pend]),0):
             res+=o
             for x in o: par.write(json.dumps(x,ensure_ascii=False)+'\n')
             par.flush()
