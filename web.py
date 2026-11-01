@@ -33,7 +33,7 @@ footer{margin-top:2rem;font-size:.82rem;color:var(--mut);border-top:1px solid va
 """
 I0,I1='\ue000','\ue001'
 _VID=re.compile(r"(?<![A-Za-zæœ])[Vv]id(?:e\b|\.)")
-_OKTOK=re.compile(r"^(?:[A-ZÆŒ][A-Za-zæœ]{0,12}\.,?|[A-ZÆŒ]{3,}[.,]?|[IVXLCDM]{1,7}(?:\.[IVXLCDM]{1,7})?[.,]?|\d+[.,;]?|[a-z]{1,4}\.,?|[a-z]{1,4}\.\d+[.,;]?|§\.?\d*[.,]?|infra|supra|seq\.|sqq?\.)$")
+_OKTOK=re.compile(r"^(?:(?:Tomo|Tom|Libro|Lib|Capite|Cap|Titulo|Tit|Epist|Orat)\.?,?|[A-ZÆŒ][A-Za-zæœ]{0,12}\.,?|[A-ZÆŒ]{3,}[.,]?|[IVXLCDM]{1,7}(?:\.[IVXLCDM]{1,7})?[.,]?|\d+[.,;]?|[a-z]{1,4}\.,?|[a-z]{1,4}\.\d+[.,;]?|§\.?\d*[.,]?|infra|supra|seq\.|sqq?\.)$")
 _STOPW={'et','vel','vt','id','est','quae','quod','sed','de','in','cum','ad'}
 def _vid(t):
     """Tras «vid.»/«vide» viene una cita: la pongo en cursiva hasta la primera palabra que ya no lo parece."""
