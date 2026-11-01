@@ -442,6 +442,9 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
     _XII={}
     try: _XII.update(_j.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'datos','xii.json'),encoding='utf-8')))
     except Exception: pass
+    _BRX={}
+    try: _BRX.update(_j.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'datos','bruns_xii.json'),encoding='utf-8')))
+    except Exception: pass
     _XIIES={}
     try: _XIIES.update(_j.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'datos','xii_es.json'),encoding='utf-8')))
     except Exception: pass
@@ -494,6 +497,9 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
             for i,b in enumerate(_XII.get(str(n),[])):
                 h.append(f"<p lang='la'{' class=\"mut\"' if b['x'] else ''}>{html.escape(b['t'])}</p>")
                 if i<len(es): h.append(f"<p class='mut' lang='es' style='margin-top:-.5em;padding-left:1em;border-left:2px solid #c9b98a'>{html.escape(es[i])}</p>")
+            if _BRX.get(str(n)): h.append(f"<details class='lxp'><summary>Bruns (1909): texto del escaneo <small class='mut'>(OCR)</small></summary><p lang='la' style='font-size:.85rem;text-align:left'>{html.escape(_BRX[str(n)])}</p></details>")
+        if _BRX.get('inc'): h.append(f"<h3>Fragmenta incertae sedis</h3><details class='lxp'><summary>Bruns (1909): texto del escaneo <small class='mut'>(OCR)</small></summary><p lang='la' style='font-size:.85rem;text-align:left'>{html.escape(_BRX['inc'])}</p></details>")
+        h.append("<p class='mut'>Edici\u00f3n de Bruns: C. G. Bruns, <i>Fontes iuris Romani antiqui</i>, 7.\u00aa ed. por Mommsen y Gradenwitz (1909), de dominio p\u00fablico, en el escaneo de <a href='https://archive.org/details/fontesiurisroman00brunuoft' target='_blank' rel='noopener'>archive.org</a>. Los bloques de Bruns son OCR directo de dos columnas: mezclan el texto de la ley (en may\u00fasculas), los testimonios y el aparato cr\u00edtico, y pueden traer errores de lectura; \u00fasalos junto con el escaneo.</p>")
         h.append("<p class='mut'>Texto: The Latin Library (dominio p\u00fablico), <i>Duodecim Tabularum leges</i>. La traducci\u00f3n al espa\u00f1ol (en gris, bajo cada pasaje) es m\u00eda (de Claude), orientativa y de libre uso, hecha sobre este texto latino reconstruido; no es una edici\u00f3n acad\u00e9mica. Para la edici\u00f3n cr\u00edtica de Bruns (<i>Fontes iuris Romani antiqui</i>, 1909) usa el conector de fuentes romanas.</p><p><a href='javascript:history.back()'>&#9756; Redi ad vocem</a></p></article>")
         return HTMLResponse(pagina(''.join(h),'','ambas','entrada'))
     @mcp.custom_route("/textus",methods=["GET"])
