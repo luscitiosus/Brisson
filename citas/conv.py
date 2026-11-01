@@ -3,7 +3,7 @@ sys.path.insert(0,'/tmp/claude-0/-home-claude/89e928e4-4473-5419-887c-3a2085f1b3
 import cites
 from cites import resolve,CT,TITLES
 D=r"[0-9iIl&æ|]"
-RX=re.compile(r"(?<![A-Za-z])[lLIi1]\.?\s*(?P<law>"+D+r"{1,4}|vlt|ult)\.?(?:\s*(?:(?P<pr>pr)\.?|(?:[§5sS$]|in\s+fin)\.?\s*(?P<pn>"+D+r"{1,3}|vlt|fin)?\.?))?\s*(?P<src>[DC])\.\s*(?P<tail>(?:[A-Za-zæãõ]+\.?,?\s*){1,9})")
+RX=re.compile(r"(?<![A-Za-z])[lLIi1]\.?\s*(?P<law>"+D+r"{1,4}|vlt|ult)\.?(?:\s*(?:(?P<pr>pr)[.*,;]?|(?:[§5sS$&*]|in\s+fin)\.?\s*(?P<pn>"+D+r"{1,3}|vlt|fin)?\.?))?\s*(?P<src>[DC])\.\s*(?P<tail>(?:[A-Za-zæãõ]+[.,]?\s*){1,9})")
 def num(x):
     if x is None: return None
     if x in('vlt','ult'): return 'ult'
