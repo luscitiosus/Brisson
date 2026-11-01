@@ -281,18 +281,16 @@ def _familia(k,v):
         if kk!=k and raiz(kk)==r: ids+=li
     return ids
 def _dicpanel(hw):
-    """Remisión (sin texto) al Diccionario de Derecho Romano de Reus (1982): el texto solo sale por el conector MCP."""
+    """Enlace a la lectura del Diccionario de Reus (1982) en la web (con clave); el texto no va en el HTML."""
     try:
         import diccionario,lexica
-        if not diccionario.disponible(): return ''
+        if not diccionario.disponible() or not os.environ.get('DICT_PASS'): return ''
         lem=lexica.buscar(hw)[0]
         ex,rel=diccionario.buscar(hw,[lem] if lem else [])
+        n=next((i for i,e in enumerate(_D) if e['hw']==hw),None)
     except Exception: return ''
-    if not ex and not rel: return ''
-    p=''
-    if ex: p+="<p><b>Cabecera(s) propia(s):</b> "+', '.join(html.escape(e['hw']) for e in ex[:6])+"</p>"
-    if rel: p+="<p><b>Voces relacionadas:</b> "+'; '.join(html.escape(r) for r in rel[:30])+(" \u2026" if len(rel)>30 else '')+"</p>"
-    return "<details class='lxp'><summary>Diccionario de Derecho Romano (Reus, 1982) <small class='mut'>(remisi\u00f3n)</small></summary>"+p+"<p class='mut'>Instituto Editorial Reus, <i>Diccionario de Derecho Romano</i>, Madrid, 1982. Es una obra con derechos de autor: aqu\u00ed solo se muestran las cabeceras; las definiciones se leen desde el conector de Claude (herramienta <i>diccionario</i> o la propia entrada con <i>brisson</i>).</p></details>"
+    if (not ex and not rel) or n is None: return ''
+    return f"<details class='lxp'><summary>Diccionario de Derecho Romano (Reus, 1982) <small class='mut'>({len(ex)} cabecera(s), {len(rel)} relacionadas)</small></summary><p><a href='/dicc?n={n}'>Leer las definiciones</a> <small class='mut'>(pide clave)</small></p></details>"
 def _lexpanel(hw):
     try:
         import lexica
@@ -452,6 +450,9 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
         return HTMLResponse(pagina(_migas(n)+_entrada(D[n],capa,imagen_url,n),'',capa,'entrada'))
     import indices
     indices.montar(mcp,D,pagina,_AUT,_RXA)
+    try:
+        import dicc_web;dicc_web.montar(mcp,D,pagina,HTMLResponse)
+    except Exception: pass
     _aut_cargar(_AUT)
     _XII={}
     try: _XII.update(_j.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'datos','xii.json'),encoding='utf-8')))

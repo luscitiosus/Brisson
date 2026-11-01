@@ -1,3 +1,4 @@
 mcp[cli]>=1.12,<2
 httpx
 cryptography>=42
+pillow>=10
