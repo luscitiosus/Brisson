@@ -47,6 +47,8 @@ article h2{font-size:1.25rem;margin:.8rem 0 .1rem}.meta{color:var(--mut);font-si
 .gr{background:var(--line);padding:0 .3em;border-radius:3px;font-size:.85em}
 #pref>summary{text-align:center;font-weight:400}#pref>summary:before{content:"\\2766\\00a0"}#pref>summary:after{content:"\\00a0\\2766"}
 .ref{color:var(--cor);font-size:.9em}
+.lxp{margin:1rem 0;font-size:.92rem}.lxp .lsx{border-left:3px solid var(--line);padding-left:.7rem}.lxp .lsx p{margin:.35rem 0;text-align:left}.lxp p{text-align:left}
+.txs p{text-align:justify;hyphens:auto}.txs .ct{display:flex;justify-content:space-between;gap:1rem;margin:1rem 0}
 a.ref{text-decoration:underline dotted}
 a.lex{color:inherit;text-decoration:underline dotted var(--hein)}
 .lx{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:.2rem 1rem 1rem;margin:1rem 0}.lx h3{margin:.8rem 0 .2rem}.lx .vs a{margin-right:.6rem;white-space:nowrap}
@@ -92,6 +94,42 @@ def _vid(t):
     out.append(t[pos:]);return ''.join(out)
 _FUENTES=[None]
 _LEXS=[]
+_AUC={}      # clave de autor -> {'t':título,'p':{'libro.cap':texto}}
+_AURX=[None]
+_AUTNOM={'Gellius':'gellius','Plinius':'plinius','Liuius':'livius','Valerius Maximus':'valerius','Quintilianus':'quintilianus','Columella':'columella','Vitruuius':'vitruvius','Curtius':'curtius'}
+_ROMV={'I':1,'V':5,'X':10,'L':50,'C':100,'D':500,'M':1000}
+def _rom(x):
+    x=x.upper()
+    if x.isdigit(): return int(x)
+    if not re.fullmatch(r'M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})',x): return None
+    t=0
+    for i,c in enumerate(x):
+        v=_ROMV[c];t+=-v if i+1<len(x) and _ROMV[x[i+1]]>v else v
+    return t or None
+def _aut_cargar(AUT):
+    import gzip,json,os
+    try: _AUC.update(json.load(gzip.open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'datos','auctores.json.gz'),'rt',encoding='utf-8')))
+    except Exception: return
+    ab={}
+    for k,v in AUT.items():
+        r=v.split(' (')[0]
+        if r in _AUTNOM: ab.setdefault(_AUTNOM[r],set()).add(k)
+    for r,c in _AUTNOM.items(): ab.setdefault(c,set()).add(r)
+    alt='|'.join(sorted({re.escape(a) for v in ab.values() for a in v},key=len,reverse=True))
+    mp={a:c for c,v in ab.items() for a in v}
+    _AURX[0]=(re.compile(r"(?<![A-Za-z\u00e6])("+alt+r")\.?(?:\s+[A-Z][a-z\u00e6]{1,8}\.?){0,2}\s+[Ll]ib(?:r)?\.?\s*([IVXLCDM]{1,7}|\d{1,3})\.?,?\s*[Cc]ap\.?\s*([IVXLCDM]{1,7}|\d{1,3})(?![A-Za-z0-9])"),mp)
+def _autl(t):
+    if not _AURX[0]: return t
+    rx,mp=_AURX[0]
+    def f(m):
+        c=mp.get(m.group(1))
+        if not c or c not in _AUC: return m.group(0)
+        l,k=_rom(m.group(2)),_rom(m.group(3))
+        if not l or not k or f"{l}.{k}" not in _AUC[c]['p']: return m.group(0)
+        txt=m.group(0)
+        if txt.count(I0)!=txt.count(I1): return txt
+        return f'<a class="ref" href="/textus?a={c}&amp;l={l}&amp;c={k}" title="Leer el pasaje latino (Perseus)">'+txt.replace(I0,'').replace(I1,'')+'</a>'
+    return rx.sub(f,t)
 _LEXV={}
 _PRE=r"(?:S\.?\s?C\.?|Senatusconsult\w*|[Ll]ex|[Ll]ege|[Ll]egem|[Ll]egis)\s+(?:de\s+)?"
 def _lex_cargar(L):
@@ -132,7 +170,7 @@ def _ps(t):
         return f'<a class="ref" href="/fons?r=PS.{b}.{m.group(3)}" title="Pauli Sententiae {b}.{m.group(3)}: texto latino (BIA)">'+re.sub('[\ue000\ue001]','',m.group(0))+'</a>'
     return _RPS.sub(f,t)
 def _fmt(t):
-    t=_lexl(_ps(html.escape(_vid(t))))
+    t=_autl(_lexl(_ps(html.escape(_vid(t)))))
     t=re.sub(r'\[((?:D|C|CTh|I|N)\.[^\]]*)\]',_refl,t)
     t=t.replace('⟦griego⟧','<span class="gr" title="griego ilegible en el OCR: mira la imagen de la página">⟦griego⟧</span>')
     res=[];d=0
@@ -153,6 +191,18 @@ def _navbtn(i,lado):
     else:
         h=f"<a class='nv' href='/entrada?n={i+1}'>Vox posterior &#9758;<small>{html.escape(_D[i+1]['hw'])}</small></a>" if i<len(_D)-1 else ''
     return f"<div class='pn2'>{h}</div>" if h else ''
+def _lexpanel(hw):
+    try:
+        import lexica
+        k,v=lexica.buscar(hw)
+    except Exception: return ''
+    if not v: return ''
+    h=[]
+    for x in v.get('el',[])[:2]: h.append(f"<p lang='en'><b>Elementary Latin Dictionary</b> <span class='mut'>s.v.</span> <i>{html.escape(x['k'])}</i>: {x['t']}</p>")
+    for x in v.get('ls',[])[:3]:
+        h.append(f"<p lang='en'><b>Lewis &amp; Short</b> <span class='mut'>s.v.</span> <i>{html.escape(x['k'])}</i></p><div class='lsx' lang='en'>"+''.join(f"<p>{ln}</p>" for ln in x['t'].split('\n'))+"</div>")
+    h.append(f"<p class='mut'>Lewis &amp; Short, <i>A Latin Dictionary</i> (1879), y Lewis, <i>An Elementary Latin Dictionary</i> (1890), en la edici\u00f3n digital de la Perseus Digital Library (<a href='https://github.com/PerseusDL/lexica' target='_blank' rel='noopener'>PerseusDL/lexica</a>, CC BY-SA 4.0). La entrada se ha buscado por la forma de la cabecera; si no es el lema, comp\u00e1rala con el texto de Brisson.</p>")
+    return f"<details class='lxp'><summary>Lexica: Lewis &amp; Short <small class='mut'>(s.v. {html.escape(v['ls'][0]['k'] if v.get('ls') else v['el'][0]['k'])})</small></summary>"+''.join(h)+"</details>"
 def _entrada(e,capa,imagen_url,i=None):
     nT=sum(1 for s in e['segs'] if s['k']=='T');ng=e.get('ngr',0)
     out=[f"<article><h2>{html.escape(e['hw'])}</h2><div class='meta'>p. {e['page']} del PDF · "
@@ -164,6 +214,7 @@ def _entrada(e,capa,imagen_url,i=None):
         if capa=='brisson' and k!='B' or capa=='heineccio' and k!='T' or capa=='corchetes' and k!='C': continue
         tag={'T':'Tramo que termina en HEIN. (nota de Heineccio)','B':'Brisson','C':'Entre corchetes en la edición'}[k]
         out.append(f"<div class='seg {k}' lang='la'><span class='tag'>{tag}</span>{_fmt(s.get('h',s['t']))}</div>")
+    out.append(_lexpanel(e['hw']))
     if i is not None and _D: out.append(_navbtn(i,'posterior'))
     out.append("</article>");return ''.join(out)
 PREF="""<details id="pref"><summary><b>Io. Henricus Boehmerus</b>, <i>Præfatio noua de interpretationis grammaticæ fatis et usu vario in iure Romano</i></summary><div id="prefbox"><p class="mut">Cargando…</p><noscript><p><a href="/prefacio">Abrir el texto en una página aparte</a></p></noscript></div></details>
@@ -225,6 +276,25 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
         return HTMLResponse(pagina(_migas(n)+_entrada(D[n],capa,imagen_url,n),'',capa,'entrada'))
     import indices
     indices.montar(mcp,D,pagina,_AUT,_RXA)
+    _aut_cargar(_AUT)
+    @mcp.custom_route("/textus",methods=["GET"])
+    async def textus(request):
+        a=request.query_params.get('a','');l=request.query_params.get('l','');c=request.query_params.get('c','')
+        W=_AUC.get(a);k=f"{l}.{c}"
+        if not W or k not in W['p']:
+            return HTMLResponse(pagina("<article><h2>Locus non inuentus</h2><p>No encuentro ese pasaje en la edici\u00f3n de Perseus. <a href='javascript:history.back()'>&#9756; Redi</a></p></article>",'','ambas','entrada'),status_code=404)
+        P=W['p']
+        def vec(kk):
+            return kk if kk in P else None
+        ks=list(P)
+        i=ks.index(k);pr=ks[i-1] if i>0 else None;po=ks[i+1] if i+1<len(ks) else None
+        def lnk(kk,txt):
+            if not kk: return '<span></span>'
+            ll,cc=kk.split('.',1)
+            return f"<a class='nv' href='/textus?a={a}&amp;l={ll}&amp;c={cc}'>{txt}</a>"
+        cuerpo=re.sub(r'\[(\w+)\]',r"<sup class='mut'>\1</sup>",html.escape(P[k]))
+        cab=f"<article class='txs'><h2>{html.escape(W['t'])}</h2><div class='meta'>lib. {html.escape(l)}, cap. {html.escape(c)}</div><p lang='la'>{cuerpo}</p><div class='ct'>{lnk(pr,'&#9756; Prior')}{lnk(po,'Posterior &#9758;')}</div><p class='mut'>Texto latino de la Perseus Digital Library (<a href='https://github.com/PerseusDL/canonical-latinLit' target='_blank' rel='noopener'>PerseusDL/canonical-latinLit</a>, CC BY-SA 4.0). La numeraci\u00f3n de libros y cap\u00edtulos es la de la edici\u00f3n moderna; Brisson cit\u00f3 por ediciones del siglo XVI-XVIII, as\u00ed que, sobre todo en Plinio, el cap\u00edtulo puede no coincidir exactamente.</p><p><a href='javascript:history.back()'>&#9756; Redi ad vocem</a></p></article>"
+        return HTMLResponse(pagina(cab,'','ambas','entrada'))
     import romanos
     _lex_cargar(_j.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'leges.json'),encoding='utf-8')))
     def _precalc():
