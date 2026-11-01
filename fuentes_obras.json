@@ -1,0 +1,99 @@
+{
+ "Cicero": {
+  "Philipp": "Philippicae",
+  "Verrin/Verr": "In Verrem (Actio II)",
+  "Amer": "Pro Sexto Roscio Amerino",
+  "Comoed": "Pro Quinto Roscio Comoedo",
+  "Catilin": "In Catilinam",
+  "Agrar": "De lege agraria",
+  "Cluent": "Pro Cluentio",
+  "Caecin": "Pro Caecina",
+  "Rosc": "Pro Roscio",
+  "Murena": "Pro Murena",
+  "Flacc": "Pro Flacco",
+  "Quinct": "Pro Quinctio",
+  "Tull": "Pro Tullio",
+  "Topic": "Topica",
+  "Tusc": "Tusculanae disputationes",
+  "Paradox": "Paradoxa Stoicorum",
+  "Diuinat": "De diuinatione",
+  "Orat": "De oratore / Orator",
+  "Partit": "Partitiones oratoriae",
+  "Epist": "Epistulae (ad Familiares / ad Atticum)"
+ },
+ "Plinius": {
+  "Epist": "Epistulae (Plinius Minor)",
+  "Hist": "Naturalis historia (Plinius Maior)",
+  "Panegyr": "Panegyricus"
+ },
+ "Gellius": {
+  "Noct/Attic": "Noctes Atticae"
+ },
+ "Seneca": {
+  "Epist": "Epistulae morales",
+  "Controu": "Controuersiae (Seneca Rhetor)",
+  "Consolat": "Consolationes",
+  "Quaest": "Naturales quaestiones"
+ },
+ "Quintilianus": {
+  "Declam": "Declamationes (maiores/minores, pseudo-Quintiliano)",
+  "Instit/Orat": "Institutio oratoria"
+ },
+ "Suetonius": {
+  "Claud": "Diuus Claudius",
+  "Calig": "Gaius Caligula",
+  "Tiber": "Tiberius",
+  "Neron": "Nero",
+  "August": "Diuus Augustus",
+  "Domitian": "Domitianus"
+ },
+ "Tacitus": {
+  "Annal": "Annales",
+  "Hist": "Historiae"
+ },
+ "Isidorus": {
+  "Orig/Etymol": "Etymologiae siue Origines"
+ },
+ "Cassiodorus": {
+  "Variar": "Variae",
+  "Tripart": "Historia ecclesiastica tripartita"
+ },
+ "Terentius": {
+  "Phorm": "Phormio",
+  "Eunuch": "Eunuchus",
+  "Adelph": "Adelphoe",
+  "Andr": "Andria",
+  "Heaut": "Heautontimorumenos",
+  "Hecyr": "Hecyra"
+ },
+ "Ouidius": {
+  "Fast": "Fasti",
+  "Metamorph": "Metamorphoses",
+  "Heroid": "Heroides",
+  "Amor": "Amores",
+  "Trist": "Tristia"
+ },
+ "Horatius": {
+  "Epist": "Epistulae",
+  "Serm": "Sermones (Satirae)",
+  "Epod": "Epodi",
+  "Carm": "Carmina"
+ },
+ "Tertullianus": {
+  "Apologet": "Apologeticus"
+ },
+ "Augustinus": {
+  "Serm": "Sermones",
+  "Epist": "Epistulae"
+ },
+ "Cuiacius": {
+  "Obseru": "Obseruationes et emendationes",
+  "Paratitl": "Paratitla"
+ },
+ "AVISO": {
+  "Claud Salmas": "«Claud. Salmas.» es Claudius Salmasius (Saumaise), no Claudiano",
+  "Nonius Marcell": "Nonius Marcellus es una sola persona",
+  "Festus Pompeius": "Sextus Pompeius Festus es una sola persona",
+  "Varro Lect": "por determinar (¿Lectiones?)"
+ }
+}
