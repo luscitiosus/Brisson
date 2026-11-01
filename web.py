@@ -253,7 +253,11 @@ def _lexpanel(hw):
         import lexica
         k,v=lexica.buscar(hw)
     except Exception: return ''
-    if not v: return ''
+    if not v:
+        try: g=lexica.ww(hw)
+        except Exception: g=None
+        if not g: return ''
+        return f"<details class='lxp'><summary>Lexica: Whitaker <small class='mut'>(s.v. {html.escape(g['s'])})</small></summary><p lang='en'><b>Whitaker's Words</b> <span class='mut'>{html.escape(g['p'])}, ra\u00edz</span> <i>{html.escape(g['s'])}-</i>: {html.escape(g['g'])}</p><p class='mut'>Esta voz no est\u00e1 en Lewis &amp; Short; glosa breve y aproximada de <i>Words</i> de William Whitaker (<a href='https://github.com/mk270/whitakers-words' target='_blank' rel='noopener'>mk270/whitakers-words</a>, de libre copia), por coincidencia de ra\u00edz: puede fallar con grafías de Brisson.</p></details>"
     h=[]
     for x in v.get('el',[])[:2]: h.append(f"<p lang='en'><b>Elementary Latin Dictionary</b> <span class='mut'>s.v.</span> <i>{html.escape(x['k'])}</i>: {x['t']}</p>")
     lss=sorted(v.get('ls',[]),key=lambda x:-len(_LSJ.findall(re.sub(r'<[^>]+>','',x['t']))))[:3]
@@ -345,9 +349,31 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
     _XIIES={}
     try: _XIIES.update(_j.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'datos','xii_es.json'),encoding='utf-8')))
     except Exception: pass
+    _LXT={}
     @mcp.custom_route("/lexicon",methods=["GET"])
     async def lexicon(request):
         import lexica
+        if 'l' not in request.query_params:
+            q=request.query_params.get('q','').strip()
+            f="<form method='get' action='/lexicon' class='bq'><input name='q' value='"+html.escape(q)+"' placeholder='palabra inglesa: testament, heir, contract\u2026' autofocus> <button>Quaere</button></form>"
+            h=["<article><h2>Quaere in lexico</h2><p class='mut'>Busca una palabra inglesa en el Lewis &amp; Short y muestra las voces de Brisson cuyo lema la contiene.</p>"+f]
+            if len(q)>=3:
+                if not _LXT:
+                    L=lexica.cargar()
+                    for k,v in L.items():
+                        if k.startswith('_'): continue
+                        _LXT[k]=re.sub(r'<[^>]+>','',' '.join(x['t'] for x in v.get('ls',[]))).lower()
+                rx=re.compile(r'\b'+re.escape(q.lower())+r'\w*')
+                res=[]
+                for i,e in enumerate(_D):
+                    k=lexica.buscar(e['hw'])[0]
+                    if k and k in _LXT:
+                        c=len(rx.findall(_LXT[k]))
+                        if c: res.append((c,i,k))
+                res.sort(reverse=True)
+                h.append(f"<p class='mut'>{len(res)} voz/voces de Brisson.</p><ul>"+''.join(f"<li><a href='/entrada?n={i}'>{html.escape(_D[i]['hw'])}</a> <small class='mut'>(<a href='/lexicon?l={k}'>{html.escape(k)}</a>, {c}\u00d7)</small></li>" for c,i,k in res[:150])+"</ul>")
+            h.append("</article>")
+            return HTMLResponse(pagina(''.join(h),'','ambas','entrada'))
         l=lexica.norm(request.query_params.get('l',''));L=lexica.cargar();v=L.get(l) if not l.startswith('_') else None
         if not v: return HTMLResponse(pagina("<article><h2>Lemma non inuentum</h2><p><a href='javascript:history.back()'>&#9756; Redi</a></p></article>",'','ambas','entrada'),status_code=404)
         h=[f"<article><h2>{html.escape(l)}</h2><div class='meta'>Lewis &amp; Short \u00b7 Elementary Latin Dictionary (Perseus, CC BY-SA 4.0)</div>"]

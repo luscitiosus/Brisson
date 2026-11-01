@@ -58,3 +58,11 @@ def buscar(hw):
     k=L.get('_alias',{}).get(norm(hw))
     if k and k in L: return k,L[k]
     return None,None
+
+_W={}
+def ww(hw):
+    """Glosa breve de Whitaker's Words (voces sin entrada en L&S) o None."""
+    if not _W:
+        try: _W.update(json.load(gzip.open(os.path.join(HERE,'datos','whitaker.json.gz'),'rt',encoding='utf-8')))
+        except Exception: _W['_vacio']={}
+    return _W.get(norm(hw))

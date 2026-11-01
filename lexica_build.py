@@ -48,7 +48,9 @@ for k,v in out.items():
     t=re.sub(r'<[^>]+>','',v['ls'][0]['t'])[:160]
     m=list(re.finditer(r'\b(?:m|f|n|adj|a|subst)\.\s*[,;]?\s*',t))
     if not m: continue
-    for w in re.findall(r"[A-Za-zāēīōūăĕĭŏŭ]+",t[m[0].end():m[0].end()+60])[:2]:
+    ws=re.findall(r"[A-Za-zāēīōūăĕĭŏŭ]+",t[m[0].end():m[0].end()+60])[:2]
+    if ws and ws[0].lower() in('v','cf','vid'): continue
+    for w in ws:
         p=norm(w)
         if p!=k and p in TODAS and len(p)>=3 and p not in('cf','from','prop','sc','esp','id','qs','also','the','and','for','in','of','to','see','like','with','that','adj','of','or'):
             PAR[k]=p;break
