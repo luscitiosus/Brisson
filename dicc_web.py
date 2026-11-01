@@ -42,6 +42,16 @@ def montar(mcp,D,pagina,HTMLResponse):
         for i,e in items: h.append(f"<p><img src='/dicc.png?i={i}' alt='Definición de {html.escape(e['hw'])}' draggable='false' style='max-width:100%;height:auto;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none' oncontextmenu='return false'></p>")
         h.append(extra+"</article><style>img{pointer-events:none}</style>")
         return ''.join(h)
+    @mcp.custom_route("/dicc/estado",methods=["GET"])
+    async def estado(request):
+        k=os.environ.get('DICT_KEY','').strip();p=os.environ.get('DICT_PASS','')
+        try:
+            import cryptography;cr='s\u00ed'
+        except Exception: cr='NO'
+        fe=os.path.exists(os.path.join(HERE,'datos','dict.enc'))
+        n=len(diccionario.cargar()['e']) if k else 0
+        f=lambda b:'s\u00ed' if b else 'NO'
+        return HTMLResponse(pagina(f"<article><h2>Estado del diccionario</h2><ul><li>DICT_KEY definida: {f(k)} (longitud {len(k)}; debe ser 44)</li><li>DICT_PASS definida: {f(p)}</li><li>Archivo datos/dict.enc presente: {f(fe)}</li><li>Biblioteca de cifrado instalada: {cr}</li><li>Entradas descifradas: {n}</li></ul></article>",'','ambas','entrada'))
     @mcp.custom_route("/dicc/login",methods=["GET","POST"])
     async def login(request):
         if not activo(): return HTMLResponse(pagina("<article><h2>Diccionario</h2><p>No está activado en este servidor.</p></article>",'','ambas','entrada'),status_code=404)
