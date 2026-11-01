@@ -15,7 +15,7 @@ button{font:inherit;padding:.55rem 1rem;border:1px solid var(--fg);background:va
 .opts{width:100%;font-size:.9rem;color:var(--mut)}.opts label{margin-right:1rem;white-space:nowrap}
 article{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:.2rem 1rem 1rem;margin:1rem 0}
 article h2{font-size:1.25rem;margin:.8rem 0 .1rem}.meta{color:var(--mut);font-size:.85rem;margin-bottom:.6rem}
-.seg{margin:.6rem 0;padding:.1rem 0 .1rem .8rem;border-left:3px solid var(--line)}
+.seg{text-align:justify;text-justify:inter-word;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word;margin:.6rem 0;padding:.1rem 0 .1rem .8rem;border-left:3px solid var(--line)}
 .seg.T{border-color:var(--hein);background:var(--hbg)}.seg.C{border-color:var(--cor);background:var(--cbg)}
 .tag{display:block;font:600 .72rem/1.3 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);margin:.3rem 0 0}
 .T .tag{color:var(--hein)}.C .tag{color:var(--cor)}
@@ -45,7 +45,7 @@ def _entrada(e,capa,imagen_url):
         k=s['k']
         if capa=='brisson' and k!='B' or capa=='heineccio' and k!='T' or capa=='corchetes' and k!='C': continue
         tag={'T':'Tramo que termina en HEIN. (nota de Heineccio)','B':'Brisson','C':'Entre corchetes en la edición'}[k]
-        out.append(f"<div class='seg {k}'><span class='tag'>{tag}</span>{_fmt(s.get('h',s['t']))}</div>")
+        out.append(f"<div class='seg {k}' lang='la'><span class='tag'>{tag}</span>{_fmt(s.get('h',s['t']))}</div>")
     plain=lambda t:t.replace('\ue000','').replace('\ue001','')
     lab={'T':'[Tramo que termina en HEIN.]','B':'[Brisson]','C':'[Entre corchetes en la edición]'}
     pr=("Traduce al español, con precisión jurídica, esta entrada del léxico latino de Brisson (De verborum quae ad ius pertinent significatione, ed. Heineccio, Halle 1743; texto de OCR, puede tener errores). "
