@@ -14,6 +14,13 @@ class HTMLResponse(_HR):
         super().__init__(lig_html(content) if isinstance(content,str) else content,*a,**k)
 
 CSS="""
+nav.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:.4rem 0;border-bottom:1px solid var(--line)}
+.bc{font-size:.85rem;color:var(--mut);margin:.6rem 0 0}.bc a{color:var(--mut)}
+.pg{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin:1rem 0}.pg a,.pg span{padding:.3rem .7rem;border:1px solid var(--line);border-radius:6px;text-decoration:none}
+.res li{margin:.7rem 0;list-style:none}.res{padding:0}mark{background:rgba(180,140,60,.35);color:inherit;padding:0 .1em;border-radius:2px}
+.sg{font-size:.9rem;color:var(--mut)}.sg a{margin-right:.8rem}
+#top{position:fixed;right:12px;bottom:12px;background:var(--card);border:1px solid var(--line);border-radius:50%;width:2.4rem;height:2.4rem;text-align:center;line-height:2.3rem;text-decoration:none;opacity:.85}
+.ir{display:flex;gap:.5rem;align-items:center;margin:.6rem 0;font-size:.9rem;color:var(--mut)}.ir input{width:6rem;font:inherit;padding:.3rem .5rem;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg)}
 @font-face{font-family:'Ibarra Real Nova';src:url('/fuente?f=Regular') format('truetype');font-weight:400;font-style:normal;font-display:swap}
 @font-face{font-family:'Ibarra Real Nova';src:url('/fuente?f=Italic') format('truetype');font-weight:400;font-style:italic;font-display:swap}
 @font-face{font-family:'Ibarra Real Nova';src:url('/fuente?f=Bold') format('truetype');font-weight:700;font-style:normal;font-display:swap}
@@ -132,7 +139,7 @@ def _entrada(e,capa,imagen_url,i=None):
     out.append("</article>");return ''.join(out)
 PREF="""<details id="pref"><summary>Dissertatio praeuia: Praefatio noua Io. Henrici Boehmeri (De interpretationis grammaticae fatis et usu vario in iure Romano)</summary><div id="prefbox"><p class="mut">Cargando…</p><noscript><p><a href="/prefacio">Abrir el texto en una página aparte</a></p></noscript></div></details>
 <script>document.getElementById('pref').addEventListener('toggle',function(){if(this.open&&!this.dataset.ok){this.dataset.ok=1;fetch('/prefacio?fragmento=1').then(function(r){return r.text()}).then(function(h){document.getElementById('prefbox').innerHTML=h}).catch(function(){document.getElementById('prefbox').innerHTML='<p><a href="/prefacio">Abrir en página aparte</a></p>'})}})</script>"""
-SCRIPT=""
+SCRIPT='<script>\n(function(){var q=document.querySelector(\'input[name=q]\'),dl=document.getElementById(\'sug\'),t;\nif(q)q.addEventListener(\'input\',function(){clearTimeout(t);var v=q.value.trim();if(v.length<2)return;t=setTimeout(function(){fetch(\'/sugerir?q=\'+encodeURIComponent(v)).then(function(r){return r.json()}).then(function(a){dl.innerHTML=a.map(function(x){return \'<option value="\'+x+\'">\'}).join(\'\')}).catch(function(){})},180)});\ndocument.addEventListener(\'keydown\',function(e){var el=document.activeElement,tag=el&&el.tagName;if(tag==\'INPUT\'||tag==\'SELECT\'||tag==\'TEXTAREA\')return;if(e.ctrlKey||e.metaKey||e.altKey)return;\nif(e.key==\'/\'){e.preventDefault();q&&q.focus()}\nelse if(e.key==\'ArrowLeft\'||e.key==\'ArrowRight\'){var l=document.querySelectorAll(\'a.nv\');if(l.length&&document.querySelectorAll(\'article\').length==1){var pr=null,po=null;l.forEach(function(a){if(a.textContent.indexOf(\'prior\')>-1)pr=a;else po=a});var a=e.key==\'ArrowLeft\'?pr:po;if(a)location=a.href}}});\ntry{var m=location.pathname==\'/entrada\'||(location.pathname==\'/\'&&document.querySelectorAll(\'article\').length==1);if(m){var h=document.querySelector(\'article h2\');if(h){var L=JSON.parse(localStorage.getItem(\'rec\')||\'[]\'),u=location.pathname+location.search;L=L.filter(function(x){return x[0]!=h.textContent});L.unshift([h.textContent,u]);localStorage.setItem(\'rec\',JSON.stringify(L.slice(0,12)))}}\nvar b=document.getElementById(\'rec\');if(b){var L2=JSON.parse(localStorage.getItem(\'rec\')||\'[]\');if(L2.length){b.innerHTML=\'<h3>Nuper uisae</h3><p class="sg">\'+L2.map(function(x){var a=document.createElement(\'a\');a.href=x[1];a.textContent=x[0];return a.outerHTML}).join(\' \')+\'</p>\'}}}catch(e){}\n})();</script><a id="top" href="#" title="Ad principium">&uarr;</a>'
 def pagina(cuerpo,q='',capa='ambas',modo='entrada'):
     sel=lambda v,x:' checked' if v==x else ''
     return f"""<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -141,7 +148,7 @@ def pagina(cuerpo,q='',capa='ambas',modo='entrada'):
 <h1>Brisson, <i>De verborum quae ad ius pertinent significatione</i></h1>
 <p class="sub">Edición de Heineccio (Halle, 1743). Texto de OCR, con Brisson y Heineccio en capas distintas.</p>
 <figure class="fr"><img src="/portada.jpg" alt="Frontispicio grabado de la edición de 1743: retratos de Brisson y de Heineccio" width="900" height="806" loading="lazy"><figcaption>Frontispicio de la edición de 1743 (grabado de G. A. Gründler y Susang): Brisson y Heineccio. Imagen de la ULB Sachsen-Anhalt, Halle.</figcaption></figure>
-<form method="get" action="/"><input type="text" name="q" value="{html.escape(q)}" placeholder="palabra latina, p. ej. exagium" autocapitalize="none" autocorrect="off" spellcheck="false" autofocus><button>Buscar</button>
+<form method="get" action="/"><input type="text" name="q" value="{html.escape(q)}" placeholder="palabra latina, \u00abfrase\u00bb o cita (D. 47.2.1)" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off" list="sug" autofocus><datalist id="sug"></datalist><button>Buscar</button>
 <div class="opts"><label><input type="radio" name="modo" value="entrada"{sel(modo,'entrada')}> entrada</label><label><input type="radio" name="modo" value="texto"{sel(modo,'texto')}> en todo el texto</label>
 <label>capa <select name="capa"><option value="ambas"{' selected' if capa=='ambas' else ''}>ambas</option><option value="brisson"{' selected' if capa=='brisson' else ''}>solo Brisson</option><option value="heineccio"{' selected' if capa=='heineccio' else ''}>solo Heineccio</option><option value="corchetes"{' selected' if capa=='corchetes' else ''}>solo corchetes</option></select></label></div></form>
 {cuerpo}
@@ -186,7 +193,7 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
         except ValueError: n=0
         n=max(0,min(len(D)-1,n));capa=request.query_params.get('capa','ambas')
         if capa not in('ambas','brisson','heineccio','corchetes'): capa='ambas'
-        return HTMLResponse(pagina(_entrada(D[n],capa,imagen_url,n),'',capa,'entrada'))
+        return HTMLResponse(pagina(_migas(n)+_entrada(D[n],capa,imagen_url,n),'',capa,'entrada'))
     import indices
     indices.montar(mcp,D,pagina,_AUT,_RXA)
     import romanos
@@ -242,36 +249,116 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
         frag=_prefacio(imagen_url)
         if request.query_params.get('fragmento'): return HTMLResponse(frag)
         return HTMLResponse(pagina(frag,'', 'ambas','entrada').replace(PREF,'',1))
+    import difflib
+    def _ncls(t): return t.replace(I0,'').replace(I1,'')
+    _TX={}
+    def _txt(capa):
+        if capa not in _TX:
+            ok={'ambas':'TBC','brisson':'B','heineccio':'T','corchetes':'C'}[capa]
+            _TX[capa]=[' \n'.join(_ncls(x['t']) for x in e['segs'] if x['k'] in ok) for e in D]
+        return _TX[capa]
+    def _tokrx(w):
+        w=re.escape(w)
+        w=w.replace('ae','(?:ae|æ)').replace('AE','(?:AE|Æ)').replace('oe','(?:oe|œ)')
+        w=re.sub(r'[uv]','[uv]',w,flags=re.I);w=re.sub(r'[ij]','[ij]',w,flags=re.I)
+        return w
+    _CITA=re.compile(r'^\s*(D|C|CTh|I)\.?\s*(\d+)\s*[.,]\s*(\d+)(?:\s*[.,]\s*(\d+|ult))?(?:\s*[.,]?\s*(pr))?\s*\.?\s*$',re.I)
+    def _regs(q):
+        m=_CITA.match(q)
+        if m:
+            sg=m.group(1).upper() if m.group(1).upper()!='CTH' else 'CTh'
+            r=r'\['+sg+r'\.'+m.group(2)+r'\.'+m.group(3)+(r'\.'+m.group(4)+r'(?![0-9])' if m.group(4) else r'\.')
+            return [re.compile(r)],'cita'
+        toks=[a or b for a,b in re.findall(r'"([^"]+)"|(\S+)',q.replace('\u00ab','"').replace('\u00bb','"'))]
+        out=[]
+        for tk in toks[:6]:
+            tk=tk.strip()
+            if not tk: continue
+            out.append(re.compile(r'\s+'.join(_tokrx(x) for x in tk.split()),re.I))
+        return out,'texto'
+    def _buscar(q,capa,pag):
+        rxs,tipo=_regs(q)
+        if not rxs: return None
+        T=_txt(capa);res=[]
+        for i,t in enumerate(T):
+            ms=[]
+            for rx in rxs:
+                m=rx.search(t)
+                if not m: break
+                ms.append(m)
+            else:
+                n=len(rxs[0].findall(t)) if tipo=='texto' else 1
+                hw=1 if all(rx.search(D[i]['hw']) for rx in rxs) else 0
+                res.append((-hw,-n,i,ms[0]))
+        res.sort()
+        PP=25;tot=len(res);ini=pag*PP;li=[]
+        for _,_,i,m in res[ini:ini+PP]:
+            t=T[i];a=max(0,m.start()-100);b=min(len(t),m.end()+100);e=D[i]
+            pre=_fmt(t[a:m.start()]);med=_fmt(t[m.start():m.end()]);post=_fmt(t[m.end():b])
+            li.append(f"<li><a href='/entrada?n={i}'>{html.escape(e['hw'])}</a> <span class='mut'>(p. {e['page']})</span><br>…{pre}<mark>{med}</mark>{post}…</li>")
+        return tot,li,tipo
+    def _pager(q,capa,pag,tot,PP=25):
+        base=f"/?q={quote(q)}&modo=texto&capa={capa}"
+        h="<div class='pg'>"
+        if pag>0: h+=f"<a href='{base}&p={pag-1}'>&#9756; Prior</a>"
+        h+=f"<span>{pag*PP+1}&ndash;{min(tot,(pag+1)*PP)} de {tot}</span>"
+        if (pag+1)*PP<tot: h+=f"<a href='{base}&p={pag+1}'>Posterior &#9758;</a>"
+        return h+"</div>"
+    @mcp.custom_route("/sugerir",methods=["GET"])
+    async def sugerir(request):
+        import json as _jj
+        from starlette.responses import JSONResponse
+        k=key(request.query_params.get('q','')[:40])
+        if not k: return JSONResponse([])
+        c=[x for x in KEYS if x.startswith(k)][:8]
+        if len(c)<8 and len(k)>=3: c+=[x for x in difflib.get_close_matches(k,KEYS,n=8-len(c),cutoff=.78) if x not in c]
+        return JSONResponse([D[BY[x][0]]['hw'] for x in c])
+    @mcp.custom_route("/pagina",methods=["GET"])
+    async def ir_pagina(request):
+        try: n=int(request.query_params.get('n','0'))
+        except ValueError: n=0
+        j=0
+        for i,e in enumerate(D):
+            if e['page']<=n: j=i
+            else: break
+        return RedirectResponse(f'/entrada?n={j}',status_code=302)
+    def _migas(i):
+        l=letra(D[i]['hw'])
+        return f"<p class='bc'><a href='/'>Quaerere</a> &rsaquo; <a href='/indice'>Index</a> &rsaquo; <a href='/indice?letra={l}'>{l}</a> &rsaquo; {html.escape(D[i]['hw'])}</p>"
     @mcp.custom_route("/",methods=["GET"])
     async def inicio(request):
-        q=(request.query_params.get('q') or '').strip()[:80];capa=request.query_params.get('capa','ambas');modo=request.query_params.get('modo','entrada')
+        q=(request.query_params.get('q') or '').strip()[:120];capa=request.query_params.get('capa','ambas');modo=request.query_params.get('modo','entrada')
+        try: pag=max(0,int(request.query_params.get('p','0')))
+        except ValueError: pag=0
         if capa not in('ambas','brisson','heineccio','corchetes'): capa='ambas'
         if not q:
             hoy=datetime.date.today();n=BIG[(hoy.toordinal()*7919)%len(BIG)];e=D[n]
-            txt=re.sub(r'\s+',' ',e['segs'][0]['t'].replace(I0,'').replace(I1,''));txt=txt[:320]+('…' if len(txt)>320 else '')
-            vd=f"<div class='vd'><h3>Vox diei</h3><b>{html.escape(e['hw'])}</b> <span class='mut'>(p. {e['page']})</span><p lang='la'>{_fmt(txt)}</p><a href='/entrada?n={n}'>Lege totum &rarr;</a> · <a href='/fortuita'>Aliam vocem!</a></div>"
-            return HTMLResponse(pagina("<p class='mut'>Escribe una palabra para ver su entrada, busca en todo el texto, o recorre el índice por letras.</p>"+abc()+vd,q,capa,modo))
-        if modo=='texto':
-            rx=re.compile(''.join('[uv]' if c in 'uvUV' else '[ij]' if c in 'ijIJ' else re.escape(c) for c in q),re.I)
-            res=[];total=0
-            for e in D:
-                for s in e['segs']:
-                    m=rx.search(s['t'])
-                    if m:
-                        total+=1
-                        if len(res)<60:
-                            a=max(0,m.start()-90);b=min(len(s['t']),m.end()+90)
-                            res.append(f"<li><a href='/?q={quote(e['hw'])}'>{html.escape(e['hw'])}</a> <span class='mut'>(p. {e['page']})</span>: …{_fmt(s['t'][a:m.start()])}<b>{_fmt(s['t'][m.start():m.end()])}</b>{_fmt(s['t'][m.end():b])}…</li>")
-                        break
-            cab=f"<p class='mut'>{total} entrada(s) contienen «{html.escape(q)}»"+(" (se muestran 60)" if total>60 else "")+".</p>"
-            return HTMLResponse(pagina(cab+"<ul>"+''.join(res)+"</ul>" if res else "<p>Sin resultados.</p>",q,capa,modo))
-        k=key(q);idx=None
-        for st in stems(k):
-            idx=BY.get(st)
-            if idx: break
-        if idx: return HTMLResponse(pagina(''.join(_entrada(D[i],capa,imagen_url,i) for i in idx),q,capa,modo))
-        pref=[x for x in KEYS if x.startswith(stems(k)[-1])][:60] if k else []
-        if pref:
-            li=''.join(f"<li><a href='/?q={quote(D[BY[c][0]]['hw'])}'>{html.escape(D[BY[c][0]]['hw'])}</a></li>" for c in pref)
-            return HTMLResponse(pagina(f"<p>Sin entrada exacta para «{html.escape(q)}». Entradas próximas:</p><ul class='c'>{li}</ul>",q,capa,modo))
-        return HTMLResponse(pagina(f"<p>Sin entrada para «{html.escape(q)}». Prueba «en todo el texto».</p>",q,capa,modo))
+            txt=re.sub(r'\s+',' ',e['segs'][0]['t'].replace(I0,'').replace(I1,''));txt=txt[:320]+('\u2026' if len(txt)>320 else '')
+            vd=f"<div class='vd'><h3>Vox diei</h3><b>{html.escape(e['hw'])}</b> <span class='mut'>(p. {e['page']})</span><p lang='la'>{_fmt(txt)}</p><a href='/entrada?n={n}'>Lege totum &rarr;</a> \u00b7 <a href='/fortuita'>Aliam vocem!</a></div>"
+            ir=f"<form class='ir' method='get' action='/pagina'><label>Ir a la p\u00e1gina del PDF <input type='number' name='n' min='1' max='{D[-1]['page']}'></label><button>Ir</button></form>"
+            ayuda="<p class='mut'>Escribe una palabra (se buscan tambi\u00e9n sus formas declinadas), una \u00abfrase entre comillas\u00bb, varias palabras (todas deben aparecer) o una cita como <a href='/?q=D.+47.2.1&modo=texto'>D. 47.2.1</a> para ver qu\u00e9 voces la mencionan. Atajos: <b>/</b> busca, <b>\u2190 \u2192</b> pasan de una voz a otra.</p>"
+            return HTMLResponse(pagina(ayuda+abc()+ir+"<div id='rec'></div>"+vd,q,capa,modo))
+        if modo!='texto':
+            k=key(q);idx=None
+            if k and ' ' not in q.strip():
+                for st in stems(k):
+                    idx=BY.get(st)
+                    if idx: break
+            if idx:
+                cuerpo=''.join(_migas(i)+_entrada(D[i],capa,imagen_url,i) if len(idx)==1 else _entrada(D[i],capa,imagen_url,i) for i in idx)
+                return HTMLResponse(pagina(cuerpo,q,capa,modo))
+            sug=''
+            if k and re.fullmatch(r"[A-Za-z\u00e6\u0153\u00c6\u0152]+",q.strip()):
+                pref=[x for x in KEYS if x.startswith(stems(k)[-1])][:40]
+                cer=[x for x in difflib.get_close_matches(k,KEYS,n=6,cutoff=.72) if x not in pref]
+                if pref or cer:
+                    sug="<p class='sg'>\u00bfQuiz\u00e1s buscabas?: "+''.join(f"<a href='/?q={quote(D[BY[c][0]]['hw'])}'>{html.escape(D[BY[c][0]]['hw'])}</a>" for c in (cer+pref)[:30])+"</p>"
+            modo='texto'
+            aviso=(f"<p class='mut'>No hay entrada que se llame \u00ab{html.escape(q)}\u00bb; se busca en todo el texto.</p>" if re.fullmatch(r'\S+',q) and not _CITA.match(q) else '')+sug
+        else: aviso=''
+        r=_buscar(q,capa,pag)
+        if not r or not r[0]:
+            return HTMLResponse(pagina(aviso+f"<p>Sin resultados para \u00ab{html.escape(q)}\u00bb.</p>",q,capa,'texto'))
+        tot,li,tipo=r
+        cab=f"<p class='mut'>{tot} voz(es) {'citan ' if tipo=='cita' else 'contienen '}\u00ab{html.escape(q)}\u00bb. Orden: primero las que lo llevan en el lema, despu\u00e9s por n\u00famero de apariciones.</p>"
+        return HTMLResponse(pagina(aviso+cab+"<ul class='res'>"+''.join(li)+"</ul>"+_pager(q,capa,pag,tot),q,capa,'texto'))
