@@ -1,5 +1,5 @@
 """Página web de consulta (sin Claude) para el léxico de Brisson: / (buscador), con paginación mínima y sin JavaScript."""
-import html,re,collections
+import html,re,collections,os
 import json as _j
 from urllib.parse import quote
 from starlette.responses import HTMLResponse as _HR
@@ -48,7 +48,7 @@ article h2{font-size:1.25rem;margin:.8rem 0 .1rem}.meta{color:var(--mut);font-si
 .gr{background:var(--line);padding:0 .3em;border-radius:3px;font-size:.85em}
 #pref>summary{text-align:center;font-weight:400}#pref>summary:before{content:"\\2766\\00a0"}#pref>summary:after{content:"\\00a0\\2766"}
 .ref{color:var(--cor);font-size:.9em}
-.lxp{margin:1rem 0;font-size:.92rem}.lxp .lsx{border-left:3px solid var(--line);padding-left:.7rem}.lxp .lsx p{margin:.35rem 0;text-align:left}.lxp details.sn{margin:.3rem 0}.lxp details.sn>summary{cursor:pointer;font-size:.9rem}.lxp details.jur>summary{font-weight:bold}.lxp p{text-align:left}
+.lxp{margin:1rem 0;font-size:.92rem}.lxp .lsx{border-left:3px solid var(--line);padding-left:.7rem}.lxp .lsx p{margin:.35rem 0;text-align:left}.lxp table.pas,table.pas{border-collapse:collapse;font-size:.85rem}table.pas td,table.pas th{border-bottom:1px solid var(--line);padding:.25rem .5rem;text-align:left;vertical-align:top}.lxp details.sn{margin:.3rem 0}.lxp details.sn>summary{cursor:pointer;font-size:.9rem}.lxp details.jur>summary{font-weight:bold}.lxp p{text-align:left}
 .txs p{text-align:justify;hyphens:auto}.txs .ct{display:flex;justify-content:space-between;gap:1rem;margin:1rem 0}
 a.ref{text-decoration:underline dotted}
 a.lex{color:inherit;text-decoration:underline dotted var(--hein)}
@@ -299,6 +299,34 @@ def _herramientas(e,i):
             f"<textarea id='nt' rows='5' style='width:100%;box-sizing:border-box' placeholder='Notas sobre esta voz\u2026'></textarea>"
             f"<p><a href='/notae'>Ver y exportar todas mis notas</a></p>"
             f"<script>(function(){{var t=document.getElementById('nt'),k={_j.dumps(k)};try{{t.value=localStorage.getItem(k)||''}}catch(e){{}}t.addEventListener('input',function(){{try{{if(t.value)localStorage.setItem(k,t.value);else localStorage.removeItem(k)}}catch(e){{}}}})}})();</script></details>")
+_TIT=[None]
+_INS={}
+def _pasajes(e):
+    """Tabla de los pasajes del Digesto/Código citados en la entrada, con jurista/obra y título (BIA)."""
+    F=_FUENTES[0]
+    if not F: return ''
+    if _TIT[0] is None:
+        try: _TIT[0]=_j.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'datos','titulos_d.json'),encoding='utf-8'))
+        except Exception: _TIT[0]={}
+    vistos=[];filas=[]
+    for s in e['segs']:
+        for m in re.finditer(r'\[((D|C)\.(\d+)\.(\d+)\.(\d+|ult))(?:pr|\.\d+|\.ult|\.pr)?\]',s['t']):
+            k=m.group(1)
+            if k in vistos: continue
+            vistos.append(k);sig,b,t,l=m.group(2),m.group(3),m.group(4),m.group(5)
+            if l=='ult': continue
+            if k not in _INS:
+                try: _INS[k]=F.insc(sig,b,t,l)
+                except Exception: _INS[k]=None
+            r=_INS[k]
+            if not r: continue
+            ins,hd=r
+            if not (ins or hd): continue
+            sp=_TIT[0].get(f'{b}.{t}') if sig=='D' else None
+            tit=(html.escape(re.sub(r'\b(legem|consultum|edictum|edicto|iulia|cornelia)\s+(\w)',lambda m:m.group(1)+' '+m.group(2).upper(),hd.capitalize())) if hd else '')+(f" <span class='mut'>\u2014 {html.escape(sp)}</span>" if sp else '')
+            filas.append(f"<tr><td><a class='ref' href='/fons?r={k}'>{k}</a></td><td>{html.escape(ins)}</td><td>{tit}</td></tr>")
+    if not filas: return ''
+    return f"<details class='lxp'><summary>Pasajes citados <small class='mut'>({len(filas)})</small></summary><div style='overflow-x:auto'><table class='pas'><tr><th>Lugar</th><th>Jurista y obra / emperador</th><th>T\u00edtulo</th></tr>{''.join(filas)}</table></div><p class='mut'>Inscripci\u00f3n y r\u00fabrica seg\u00fan el texto cr\u00edtico de BIA (Mommsen, Krueger). La traducci\u00f3n espa\u00f1ola del t\u00edtulo es m\u00eda; solo la tienen los t\u00edtulos del Digesto m\u00e1s citados.</p></details>"
 def _entrada(e,capa,imagen_url,i=None):
     nT=sum(1 for s in e['segs'] if s['k']=='T');ng=e.get('ngr',0)
     out=[f"<article><h2>{html.escape(e['hw'])}</h2><div class='meta'>p. {e['page']} del PDF · "
@@ -310,6 +338,8 @@ def _entrada(e,capa,imagen_url,i=None):
         if capa=='brisson' and k!='B' or capa=='heineccio' and k!='T' or capa=='corchetes' and k!='C': continue
         tag={'T':'Tramo que termina en HEIN. (nota de Heineccio)','B':'Brisson','C':'Entre corchetes en la edición'}[k]
         out.append(f"<div class='seg {k}' lang='la'><span class='tag'>{tag}</span>{_fmt(s.get('h',s['t']))}</div>")
+    try: out.append(_pasajes(e))
+    except Exception: pass
     out.append(_lexpanel(e['hw']))
     if i is not None and _D:
         try: out.append(_cocitas(i))

@@ -132,6 +132,16 @@ class Fuentes:
             if not nums: return None
             l = str(max(nums))
         return self.con.execute('SELECT * FROM nodes WHERE w=? AND key=? ORDER BY ord', (w, f'{b}.{t}.{l}')).fetchone()
+    def insc(self, sig, b, t, l):
+        """(inscriptio de la ley, rúbrica del título) o None. Ej.: ('Paulus libro nono quaestionum', 'DE VULGARI ET …')."""
+        if not self.ok() or sig not in OBRAS: return None
+        w = OBRAS[sig][0]; k = f'{b}.{t}.{l}'
+        try:
+            f = self.con.execute("SELECT text FROM nodes WHERE w=? AND lower(type)='inscriptio' AND (key=? OR key LIKE ? OR key LIKE ?) ORDER BY ord LIMIT 1", (w, k, k + '.%', k + '#%')).fetchone()
+            h = self.con.execute('SELECT head FROM nodes WHERE w=? AND key=?', (w, f'{b}.{t}')).fetchone()
+        except Exception: return None
+        ins = re.sub(r'^\s*\[?[^\]]*\u00b7\s*Inscriptio\]\s*', '', f['text']).strip() if f else ''
+        return ins, (h['head'] if h else '')
     def leer(self, sig, ref):
         """ref = '1.1.10' o '1.1.10.pr' → (título obra, rúbrica, [(etiqueta, texto)], etiqueta destacada, nota)"""
         if not self.ok() or sig not in OBRAS: return None
