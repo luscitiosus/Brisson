@@ -84,12 +84,12 @@ def build():
     DB.parent.mkdir(parents=True, exist_ok=True)
     tmp = DB.with_suffix('.tmp'); tmp.unlink(missing_ok=True)
     con = sqlite3.connect(tmp); con.executescript(SCHEMA)
-    cl = httpx.Client(timeout=httpx.Timeout(300, connect=30), follow_redirects=True, headers={'User-Agent': 'brisson-web/1.0 (estudio personal)'})
+    cl = httpx.Client(timeout=httpx.Timeout(45, connect=15), follow_redirects=True, headers={'User-Agent': 'brisson-web/1.0 (estudio personal)'})
     ok = 0
     for sig, (w, titulo, uuid, h) in OBRAS.items():
         xml = DB.parent / f'{w}.xml'
         try:
-            for intento in range(4):
+            for intento in range(2):
                 try:
                     bundles = cl.get(f'{API}/core/items/{uuid}/bundles').json(); done = False
                     for b in bundles['_embedded']['bundles']:
