@@ -37,8 +37,8 @@ def montar(mcp,D,pagina,HTMLResponse):
     def ent(n):
         hw=D[n]['hw'];lem=lexica.buscar(hw)[0]
         return diccionario.buscar(hw,[lem] if lem else [])
-    def vista(titulo,items,extra=''):
-        h=[f"<article><h2>{html.escape(titulo)}</h2><p class='mut'>Diccionario de Derecho Romano, Instituto Editorial Reus, Madrid, 1982. Obra con derechos de autor, mostrada como imagen para lectura personal.</p><form method='get' action='/dicc'><input name='q' placeholder='cabecera o texto…'> <button>Quaere</button></form>"]
+    def vista(titulo,items,extra='',qv='',mt=False):
+        h=[f"<article><h2>{html.escape(titulo)}</h2><p class='mut'>Diccionario de Derecho Romano, Instituto Editorial Reus, Madrid, 1982. Obra con derechos de autor, mostrada como imagen para lectura personal.</p><form method='get' action='/dicc'><input name='q' value='{html.escape(qv)}' placeholder='cabecera o texto…' style='width:60%'> <button>Quaere</button><br><label><input type='radio' name='m' value='c' {'' if mt else 'checked'}> cabecera</label> <label><input type='radio' name='m' value='t' {'checked' if mt else ''}> en todo el texto</label></form>"]
         for i,e in items: h.append(f"<p><img src='/dicc.png?i={i}' alt='Definición de {html.escape(e['hw'])}' draggable='false' style='max-width:100%;height:auto;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none' oncontextmenu='return false'></p>")
         h.append(extra+"</article><style>img{pointer-events:none}</style>")
         return ''.join(h)
@@ -76,14 +76,15 @@ def montar(mcp,D,pagina,HTMLResponse):
         q=(p.get('q') or '').strip()
         if q:
             qq=' '.join(lexica.norm(w.replace('0','O')) for w in q.split() if lexica.norm(w.replace('0','O')))
-            ids=list(C['k'].get(qq,[]))
-            for k,li in C['k'].items():
+            mt=p.get('m')=='t'
+            ids=[] if mt else list(C['k'].get(qq,[]))
+            for k,li in ([] if mt else C['k'].items()):
                 if len(ids)>=12: break
                 if k.startswith(qq): ids+=[i for i in li if i not in ids]
             if not ids:
                 rx=re.compile(''.join('[uv]' if c in 'uvUV' else re.escape(c) for c in q),re.I)
-                ids=[i for i,e in enumerate(C['e']) if rx.search(e['t'])][:10]
-            return HTMLResponse(pagina(vista('«'+q+'»',[(i,C['e'][i]) for i in ids[:12]]),'','ambas','entrada'))
+                ids=[i for i,e in enumerate(C['e']) if rx.search(e['t'])][:20]
+            return HTMLResponse(pagina(vista('«'+q+'»',[(i,C['e'][i]) for i in ids[:20]],'',q,mt),'','ambas','entrada'))
         return HTMLResponse(pagina(vista('Diccionario de Derecho Romano',[]),'','ambas','entrada'))
     @mcp.custom_route("/dicc.png",methods=["GET"])
     async def dpng(request):
