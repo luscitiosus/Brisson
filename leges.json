@@ -1,0 +1,258 @@
+[
+ {
+  "id": "trebelliano",
+  "nombre": "Senadoconsulto Trebeliano",
+  "tipo": "senadoconsulto",
+  "rx": "Tre[bt]e?l+\\w*|Treb\\b|Irebell\\w*|Trelell\\w*|Trobell\\w*|Trelbell\\w*|Tretbell\\w*|Frebell\\w*",
+  "solo_prefijo": false,
+  "desc": "Senadoconsulto del reinado de Nerón, bajo los cónsules Trebelio Máximo y Anneo Séneca. Dispuso que, al restituirse una herencia en virtud de un fideicomiso, las acciones hereditarias (activas y pasivas) que correspondían al heredero pasaran al fideicomisario; el pretor las concedió después como acciones útiles.",
+  "fuentes": [
+   {
+    "t": "Instituciones de Justiniano 2.23.4",
+    "u": "/fons?r=I.2.23.4"
+   },
+   {
+    "t": "Digesto 36.1, «Ad senatus consultum Trebellianum»",
+    "u": "/fons?r=D.36.1.1.pr"
+   }
+  ]
+ },
+ {
+  "id": "pegasiano",
+  "nombre": "Senadoconsulto Pegasiano",
+  "tipo": "senadoconsulto",
+  "rx": "Pegasian\\w*",
+  "solo_prefijo": false,
+  "desc": "Senadoconsulto bajo los cónsules Pegaso y Pusión. Como los herederos rogados de restituir toda la herencia, o casi toda, solían negarse a aceptarla por falta de lucro, permitió al rogado retener una cuarta parte, igual que la lex Falcidia en los legados, y también en los fideicomisos de cosas singulares.",
+  "fuentes": [
+   {
+    "t": "Gayo 2.254",
+    "u": "/fons?r=Gai.2.254"
+   }
+  ]
+ },
+ {
+  "id": "velleiano",
+  "nombre": "Senadoconsulto Veleyano",
+  "tipo": "senadoconsulto",
+  "rx": "Vellei\\w*|Velleia\\w*|Vellcian\\w*|Velltian\\w*|Vellelam|Vellelano|Vellui|Vell\\.",
+  "solo_prefijo": false,
+  "desc": "Senadoconsulto que prohibió a las mujeres intervenir (intercedere) garantizando deudas ajenas. Antes ya habían vedado a las mujeres intervenir por sus maridos edictos de Augusto y, después, de Claudio.",
+  "fuentes": [
+   {
+    "t": "Digesto 16.1.2 pr., «Ad senatus consultum Velleianum»",
+    "u": "/fons?r=D.16.1.2.pr"
+   }
+  ]
+ },
+ {
+  "id": "macedoniano",
+  "nombre": "Senadoconsulto Macedoniano",
+  "tipo": "senadoconsulto",
+  "rx": "Macedon\\w*|Maced\\b|Macedun\\w*|Mccdon\\w*|Mactd\\w*",
+  "solo_prefijo": false,
+  "desc": "Senadoconsulto de la época de Vespasiano (69-79 d. C.) sobre los préstamos concedidos a hijos de familia sometidos a la patria potestad: impedía que el acreedor reclamara la mayoría de esos préstamos, para evitar abusos y fraudes.",
+  "fuentes": [
+   {
+    "t": "Wikipedia: Senatus consultum Macedonianum",
+    "u": "https://en.wikipedia.org/wiki/Senatus_consultum_Macedonianum"
+   }
+  ]
+ },
+ {
+  "id": "silaniano",
+  "nombre": "Senadoconsulto Silaniano",
+  "tipo": "senadoconsulto",
+  "rx": "Silan\\w*",
+  "solo_prefijo": false,
+  "desc": "Senadoconsulto sobre el asesinato del señor: para que ninguna casa pudiera estar segura sin que los esclavos respondieran con su vida de la custodia del dueño, ordenó investigar con quaestio pública a la familia de esclavos de los asesinados. El título digestal añade que no se abran los testamentos de las víctimas antes de esa investigación.",
+  "fuentes": [
+   {
+    "t": "Digesto 29.5, «De senatus consulto Silaniano et Claudiano»",
+    "u": "/fons?r=D.29.5.1.pr"
+   }
+  ]
+ },
+ {
+  "id": "turpilliano",
+  "nombre": "Senadoconsulto Turpiliano",
+  "tipo": "senadoconsulto",
+  "rx": "Turpill?\\w*",
+  "solo_prefijo": false,
+  "desc": "Senadoconsulto sobre la temeridad de los acusadores. Según el título del Digesto, esta se manifiesta de tres maneras y se castiga con tres penas: la calumnia, la prevaricación y la tergiversación.",
+  "fuentes": [
+   {
+    "t": "Digesto 48.16.1 pr., «Ad senatus consultum Turpillianum»",
+    "u": "/fons?r=D.48.16.1.pr"
+   }
+  ]
+ },
+ {
+  "id": "tertuliano",
+  "nombre": "Senadoconsulto Tertuliano",
+  "tipo": "senadoconsulto",
+  "rx": "Tertull?\\w*|Terrull\\w*",
+  "solo_prefijo": false,
+  "desc": "Senadoconsulto sobre la sucesión de la madre. Las XII Tablas, aplicadas con rigor, no daban derecho a heredar recíprocamente entre madre e hijos: solo el pretor los llamaba por la bonorum possessio unde cognati. El título de las Instituciones trata el remedio introducido por este senadoconsulto.",
+  "fuentes": [
+   {
+    "t": "Instituciones de Justiniano 3.3",
+    "u": "/fons?r=I.3.3.pr"
+   }
+  ]
+ },
+ {
+  "id": "orfitiano",
+  "nombre": "Senadoconsulto Orficiano",
+  "tipo": "senadoconsulto",
+  "rx": "Orphit\\w*|Qrphit\\w*|Vrphit\\w*",
+  "solo_prefijo": false,
+  "desc": "Senadoconsulto dictado bajo los cónsules Orfito y Rufo, en tiempos de Marco Aurelio. Al contrario del Tertuliano, admitió a los hijos y a las hijas a la herencia legítima de la madre intestada, aunque estuvieran sometidos a potestad, con preferencia sobre los consanguíneos y agnados de la difunta.",
+  "fuentes": [
+   {
+    "t": "Instituciones de Justiniano 3.4 pr.",
+    "u": "/fons?r=I.3.4.pr"
+   }
+  ]
+ },
+ {
+  "id": "falcidia",
+  "nombre": "Lex Falcidia",
+  "tipo": "lex",
+  "rx": "Falcid\\w*",
+  "solo_prefijo": true,
+  "desc": "Ley del año 40 a. C., propuesta por el tribuno Publio Falcidio, sobre los límites de los legados: no podían agotar la herencia, sino llegar como máximo a las tres cuartas partes, de modo que al heredero le quedara al menos una cuarta parte (la «cuarta Falcidia»).",
+  "fuentes": [
+   {
+    "t": "Wikipedia: Lex Falcidia",
+    "u": "https://es.wikipedia.org/wiki/Lex_Falcidia"
+   }
+  ]
+ },
+ {
+  "id": "aquilia",
+  "nombre": "Lex Aquilia",
+  "tipo": "lex",
+  "rx": "Aquill?i?\\w*",
+  "solo_prefijo": true,
+  "desc": "Ley del siglo III a. C. sobre el daño causado injustamente (damnum iniuria datum). Obligaba a indemnizar en dinero al dueño de esclavos, ganado u otras cosas muertas, quemadas, rotas o deterioradas, tasadas según su valor.",
+  "fuentes": [
+   {
+    "t": "Wikipedia: Lex Aquilia",
+    "u": "https://es.wikipedia.org/wiki/Lex_Aquilia"
+   }
+  ]
+ },
+ {
+  "id": "papia",
+  "nombre": "Lex Papia Poppaea",
+  "tipo": "lex",
+  "rx": "Papia(?:\\s+Poppaea)?",
+  "solo_prefijo": true,
+  "desc": "Ley del año 9 d. C. que completó la legislación matrimonial de Augusto: favorecía el matrimonio y la procreación, y penalizaba el celibato y la falta de hijos en materia de herencias y legados.",
+  "fuentes": [
+   {
+    "t": "Wikipedia: Lex Papia Poppaea",
+    "u": "https://en.wikipedia.org/wiki/Lex_Papia_Poppaea"
+   }
+  ]
+ },
+ {
+  "id": "aelia",
+  "nombre": "Lex Aelia Sentia",
+  "tipo": "lex",
+  "rx": "A[ec]lia\\s+Sentia",
+  "solo_prefijo": true,
+  "desc": "Ley del año 4 d. C. sobre las manumisiones: fijó edades mínimas para manumitir y ser manumitido, y condicionó la ciudadanía plena de los libertos.",
+  "fuentes": [
+   {
+    "t": "Wikipedia: Lex Aelia Sentia",
+    "u": "https://en.wikipedia.org/wiki/Lex_Aelia_Sentia"
+   }
+  ]
+ },
+ {
+  "id": "fufia",
+  "nombre": "Lex Fufia Caninia",
+  "tipo": "lex",
+  "rx": "Fu[fs]ia\\s+Caninia",
+  "solo_prefijo": true,
+  "desc": "Ley del año 2 a. C., bajo Augusto, que limitó la manumisión de esclavos por testamento: el número máximo dependía de cuántos esclavos tuviera el testador, con un tope de cien.",
+  "fuentes": [
+   {
+    "t": "Wikipedia: Lex Fufia Caninia",
+    "u": "https://en.wikipedia.org/wiki/Lex_Fufia_Caninia"
+   }
+  ]
+ },
+ {
+  "id": "iunia",
+  "nombre": "Lex Iunia (Norbana)",
+  "tipo": "lex",
+  "rx": "Iunia\\b",
+  "solo_prefijo": true,
+  "desc": "Atención: el nombre designa varias leyes. La lex Iunia Norbana (fecha incierta, c. 17 a. C.) creó la condición de los «latinos junianos»: los libertos manumitidos sin cumplir los requisitos de la lex Aelia Sentia pasaban a ser latinos y no ciudadanos.",
+  "fuentes": [
+   {
+    "t": "Wikipedia: Lex Iunia Norbana",
+    "u": "https://en.wikipedia.org/wiki/Lex_Iunia_Norbana"
+   }
+  ]
+ },
+ {
+  "id": "voconia",
+  "nombre": "Lex Voconia",
+  "tipo": "lex",
+  "rx": "Voc[eo]n\\w*",
+  "solo_prefijo": true,
+  "desc": "Ley del año 169 a. C. que prohibía a quienes tuvieran un patrimonio de al menos 100.000 ases instituir heredera a una mujer, y limitaba los legados excesivos. Se eludía con fideicomisos; Augusto la suavizó con la lex Papia Poppaea.",
+  "fuentes": [
+   {
+    "t": "Wikipedia: Lex Voconia",
+    "u": "https://en.wikipedia.org/wiki/Lex_Voconia"
+   }
+  ]
+ },
+ {
+  "id": "cincia",
+  "nombre": "Lex Cincia",
+  "tipo": "lex",
+  "rx": "Cincia",
+  "solo_prefijo": true,
+  "desc": "Ley atribuida al tribuno Marco Cincio Alimento (204 a. C.) sobre donaciones y honorarios: prohibía dar regalos a los abogados por su defensa y limitaba el valor de las donaciones, con excepciones (por ejemplo, entre parientes).",
+  "fuentes": [
+   {
+    "t": "Wikipedia: Lex Cincia",
+    "u": "https://en.wikipedia.org/wiki/Lex_Cincia"
+   }
+  ]
+ },
+ {
+  "id": "atinia",
+  "nombre": "Lex Atinia",
+  "tipo": "lex",
+  "rx": "Atinia",
+  "solo_prefijo": true,
+  "desc": "Ley de comienzos del siglo II a. C. (entre 197 y 195 a. C.), propuesta por Gayo Atinio Labeón, que impidió adquirir por usucapión las cosas robadas.",
+  "fuentes": [
+   {
+    "t": "Wikipedia: Lex Atinia",
+    "u": "https://en.wikipedia.org/wiki/Lex_Atinia"
+   }
+  ]
+ },
+ {
+  "id": "rhodia",
+  "nombre": "Lex Rhodia de iactu",
+  "tipo": "lex",
+  "rx": "Rhod\\w*",
+  "solo_prefijo": true,
+  "desc": "Regla de derecho marítimo: si se arrojan mercancías al mar para aligerar el barco (iactus), el daño se reparte entre todos los interesados mediante contribución, de modo que lo dado por todos se resarza entre todos.",
+  "fuentes": [
+   {
+    "t": "Digesto 14.2.1, «De lege Rhodia de iactu»",
+    "u": "/fons?r=D.14.2.1.pr"
+   }
+  ]
+ }
+]

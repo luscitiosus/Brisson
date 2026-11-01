@@ -1,5 +1,5 @@
 """Página web de consulta (sin Claude) para el léxico de Brisson: / (buscador), con paginación mínima y sin JavaScript."""
-import html,re
+import html,re,collections
 from urllib.parse import quote
 from starlette.responses import HTMLResponse as _HR
 _LIG=re.compile(r'ae|AE|Ae|aE')
@@ -47,6 +47,8 @@ article h2{font-size:1.25rem;margin:.8rem 0 .1rem}.meta{color:var(--mut);font-si
 .gr{background:var(--line);padding:0 .3em;border-radius:3px;font-size:.85em}
 .ref{color:var(--cor);font-size:.9em}
 a.ref{text-decoration:underline dotted}
+a.lex{color:inherit;text-decoration:underline dotted var(--hein)}
+.lx{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:.2rem 1rem 1rem;margin:1rem 0}.lx h3{margin:.8rem 0 .2rem}.lx .vs a{margin-right:.6rem;white-space:nowrap}
 .hit{background:rgba(180,140,60,.25);padding:.2em .4em;border-left:3px solid var(--cor)}
 i{font-style:italic}details{margin:1.6rem 0;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:.2rem 1rem}summary{cursor:pointer;font-weight:600;padding:.6rem 0}.pf p{margin:.7rem 0;text-align:justify}.pf .pn{font:.75rem system-ui,sans-serif;color:var(--mut);display:block;margin-top:1rem}figure.fr{margin:.6rem auto 1rem;max-width:26rem;text-align:center}figure.fr img{width:100%;height:auto;border-radius:6px;border:1px solid var(--line)}figcaption{font-size:.78rem;color:var(--mut);margin-top:.3rem}button.vers{display:block;margin:1rem auto .2rem;padding:.55rem clamp(.5rem,3vw,1.4rem) .6rem;max-width:100%;text-align:center;cursor:pointer;color:#2b1d10;background:radial-gradient(ellipse at 50% 40%,#f3e6c8,#e3cf9f);border:1px solid #2b1d10;outline:3px double #2b1d10;outline-offset:-6px;border-radius:3px;box-shadow:0 1px 0 #fff8 inset,0 2px 4px #0004;font-family:Georgia,'Times New Roman',serif}
 button.vers .t{display:block;font-variant:small-caps;letter-spacing:.22em;font-size:1.05rem;font-weight:bold}
@@ -88,6 +90,27 @@ def _vid(t):
             out.append(t[pos:m.start()]+I0+t[m.start():end]+I1);pos=end
     out.append(t[pos:]);return ''.join(out)
 _FUENTES=[None]
+_LEXS=[]
+_PRE=r"(?:S\.?\s?C\.?|Senatusconsult\w*|[Ll]ex|[Ll]ege|[Ll]egem|[Ll]egis)\s+(?:de\s+)?"
+def _lex_cargar(L):
+    for x in L:
+        rx=x['rx']
+        con=re.compile(r"(?<![A-Za-z\u00e6])"+_PRE+"(?:"+rx+r")(?![A-Za-z\u00e6])")
+        sin=None
+        if x['tipo']=='senadoconsulto':
+            core=rx.replace(r"|Vell\.","")
+            sin=re.compile(r"(?<![A-Za-z\u00e6])(?=[A-Za-z\u00e6]*ian)(?:"+core+r")(?<!ianus)(?![A-Za-z\u00e6])")
+        _LEXS.append((x,con,sin))
+def _lexl(t):
+    if not _LEXS: return t
+    for x,con,sin in _LEXS:
+        tt=x['nombre']
+        rep=lambda m:f'<a class="lex" href="/leges#{x["id"]}" title="{tt}">{m.group(0)}</a>'
+        t=con.sub(rep,t)
+        if sin:
+            parts=re.split(r'(<a class="lex".*?</a>|<[^>]+>)',t)
+            t=''.join(p if i%2 else sin.sub(rep,p) for i,p in enumerate(parts))
+    return t
 _RR=re.compile(r'^(D|C|CTh|I)\.(\d+)\.(\d+)\.(\d+|ult)(?:\.?pr|\.(\d+|ult))?$|^(PS)\.(\d+)\.(\d+)(?:\.(\d+))?$')
 def _refl(m):
     r=m.group(1);mm=_RR.match(html.unescape(r))
@@ -107,7 +130,7 @@ def _ps(t):
         return f'<a class="ref" href="/fons?r=PS.{b}.{m.group(3)}" title="Pauli Sententiae {b}.{m.group(3)}: texto latino (BIA)">'+re.sub('[\ue000\ue001]','',m.group(0))+'</a>'
     return _RPS.sub(f,t)
 def _fmt(t):
-    t=_ps(html.escape(_vid(t)))
+    t=_lexl(_ps(html.escape(_vid(t))))
     t=re.sub(r'\[((?:D|C|CTh|I|N)\.[^\]]*)\]',_refl,t)
     t=t.replace('⟦griego⟧','<span class="gr" title="griego ilegible en el OCR: mira la imagen de la página">⟦griego⟧</span>')
     res=[];d=0
@@ -148,7 +171,7 @@ def pagina(cuerpo,q='',capa='ambas',modo='entrada'):
     sel=lambda v,x:' checked' if v==x else ''
     return f"""<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Brisson · léxico jurídico latino</title><style>{CSS}</style></head><body><main>
-<nav class="top"><a href="/">Quaerere</a><a href="/indice">Index vocum</a><a href="/auctores">Auctores</a><a href="/tabula">Tabula</a><a href="/loci">Loci</a><a href="/fortuita">Vox fortuita</a></nav>
+<nav class="top"><a href="/">Quaerere</a><a href="/indice">Index vocum</a><a href="/auctores">Auctores</a><a href="/tabula">Tabula</a><a href="/loci">Loci</a><a href="/leges">Leges</a><a href="/fortuita">Vox fortuita</a></nav>
 <h1>Brisson, <i>De verborum quae ad ius pertinent significatione</i></h1>
 <p class="sub">Edición de Heineccio (Halle, 1743). Texto de OCR, con Brisson y Heineccio en capas distintas.</p>
 <figure class="fr"><img src="/portada.jpg" alt="Frontispicio grabado de la edición de 1743: retratos de Brisson y de Heineccio" width="900" height="806" loading="lazy"><figcaption>Frontispicio de la edición de 1743 (grabado de G. A. Gründler y Susang): Brisson y Heineccio. Imagen de la ULB Sachsen-Anhalt, Halle.</figcaption></figure>
@@ -201,6 +224,21 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
     import indices
     indices.montar(mcp,D,pagina,_AUT,_RXA)
     import romanos
+    _lex_cargar(_j.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'leges.json'),encoding='utf-8')))
+    @mcp.custom_route("/leges",methods=["GET"])
+    async def leges(request):
+        cuerpo=["<h2>Leges et senatus consulta</h2><p class='mut'>Leyes y senadoconsultos romanos que cita el l\u00e9xico, con una breve descripci\u00f3n en espa\u00f1ol y las fuentes de donde sale (Instituciones, Digesto y Gayo en la edici\u00f3n de BIA; Wikipedia para las dem\u00e1s). Cada menci\u00f3n en el texto enlaza aqu\u00ed. Las voces citan esas leyes con variantes de OCR; las leyes con muchos hom\u00f3nimos (Cornelia, Iulia\u2026) no se incluyen todav\u00eda.</p>"]
+        for x,con,sin in _LEXS:
+            vs=collections.Counter()
+            for i,e in enumerate(D):
+                for sg in e['segs']:
+                    tx=sg['t'].replace(I0,'').replace(I1,'')
+                    n=len(con.findall(tx))+(len(sin.findall(tx)) if sin else 0)
+                    if n: vs[i]+=n
+            fu=' \u00b7 '.join(f"<a href='{html.escape(f['u'])}'"+(" target='_blank' rel='noopener'" if f['u'].startswith('http') else '')+f">{html.escape(f['t'])}</a>" for f in x['fuentes'])
+            vo=' '.join(f"<a href='/entrada?n={i}'>{html.escape(D[i]['hw'])}</a>" for i,_ in vs.most_common(40))
+            cuerpo.append(f"<div class='lx' id='{x['id']}'><h3>{html.escape(x['nombre'])}</h3><div class='meta'>{x['tipo']} \u00b7 {sum(vs.values())} menci\u00f3n(es) en {len(vs)} voz(es)</div><p>{html.escape(x['desc'])}</p><p class='mut'>Fuente: {fu}</p>"+(f"<p class='vs' lang='la'>{vo}</p>" if vo else '')+"</div>")
+        return HTMLResponse(pagina(''.join(cuerpo),'','ambas','entrada'))
     _F=romanos.Fuentes()
     _FUENTES[0]=_F if _F.ok() and _F.obras() else None
     @mcp.custom_route("/fons",methods=["GET"])
