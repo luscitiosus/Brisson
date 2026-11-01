@@ -8,7 +8,7 @@ import json,re,os,sys
 from mcp.server.fastmcp import FastMCP, Image
 HERE=os.path.dirname(os.path.abspath(__file__))
 import urn_halle
-INSTRUCTIONS="""Léxico jurídico latino de Brisson con las notas de Heineccio (1743). `brisson(palabra)` da la entrada con el texto íntegro y las citas ya convertidas a numeración moderna entre [corchetes] (D., C.); la capa dice qué es de Brisson y qué termina en HEIN. `brisson_texto` busca dentro de todas las entradas. El griego del OCR es ilegible y aparece como ⟦griego⟧: da al usuario el enlace de la página y pídele una captura de la línea; con `ligaturas_griegas` tienes la lámina de nexos para leerla. Lo que leas en una imagen es lectura tuya, no texto verificado: dilo. Los números de las citas pueden tener errores de OCR; no los des por buenos sin contrastarlos con el conector de fuentes romanas."""
+INSTRUCTIONS="""Léxico jurídico latino de Brisson con las notas de Heineccio (1743). `brisson(palabra)` da la entrada con el texto íntegro y las citas ya convertidas a numeración moderna entre [corchetes] (D., C.); la capa dice qué es de Brisson y qué termina en HEIN. `brisson_texto` busca dentro de todas las entradas. `brisson_revisar(palabra)` revisa una entrada contra un corpus de formas latinas y propone correcciones de OCR (son candidatos, no certezas). El griego del OCR es ilegible y aparece como ⟦griego⟧: da al usuario el enlace de la página y pídele una captura de la línea; con `ligaturas_griegas` tienes la lámina de nexos para leerla. Lo que leas en una imagen es lectura tuya, no texto verificado: dilo. Los números de las citas pueden tener errores de OCR; no los des por buenos sin contrastarlos con el conector de fuentes romanas."""
 _SECRET=os.environ.get("MCP_SECRET","").strip("/")
 PATH=os.environ.get("MCP_PATH") or (f"/{_SECRET}/mcp" if _SECRET else "/mcp")
 mcp=FastMCP("Brisson",instructions=INSTRUCTIONS,host="0.0.0.0",port=int(os.environ.get("PORT","8000")),streamable_http_path=PATH,stateless_http=True,json_response=True)
@@ -66,6 +66,23 @@ def brisson(palabra:str,capa:str="ambas",parte:int=1,max_caracteres:int=6000)->s
     n=max(1,-(-len(txt)//max_caracteres)); parte=max(1,min(parte,n))
     out=txt[(parte-1)*max_caracteres:parte*max_caracteres]
     return out+(f"\n[parte {parte}/{n}]" if n>1 else "")
+@mcp.tool()
+def brisson_revisar(palabra:str,max_resultados:int=40)->str:
+    """Revisa una entrada contra un corpus de ~560.000 formas latinas declinadas (Latin Library, Perseus) y los nombres de juristas y autores: marca palabras sospechosas de error de OCR y propone correcciones (forma parecida, palabras pegadas o separadas). No modifica nada: da candidatos con su frecuencia para confirmarlos."""
+    import revisar
+    k=key(palabra)
+    for st in stems(k):
+        idx=BY.get(st)
+        if idx: break
+    else: return f"Sin entrada para «{palabra}»."
+    out=[]
+    for i in idx:
+        e=D[i];r=revisar.informe(e,D)[:max_resultados]
+        out.append(f"## {e['hw']} (p.{e['page']}): {len(r)} palabra(s) sospechosa(s)")
+        for x in r:
+            sg='; '.join(f"{a} ({t}, {f})" for a,t,f in x['sug']) or 'sin candidato (¿nombre propio o error mayor?)'
+            out.append(f"- «{x['palabra']}» [{x['capa']}] …{x['ctx']}…  →  {sg}")
+    return "\n".join(out)
 @mcp.tool()
 def brisson_texto(consulta:str,limite:int=15)->str:
     """Busca una palabra dentro del texto de todas las entradas (también la que no es cabecera). Devuelve cabecera, página y un fragmento corto."""

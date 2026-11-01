@@ -240,6 +240,22 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
             _LEXV.update(tmp)
         except Exception: pass
     import threading;threading.Thread(target=_precalc,daemon=True).start()
+    @mcp.custom_route("/revisar",methods=["GET"])
+    async def revisar_web(request):
+        import revisar as _rv
+        q=(request.query_params.get('voz') or '').strip()[:60]
+        form=f"<form method='get' action='/revisar'><input type='text' name='voz' value='{html.escape(q)}' placeholder='voz a revisar' autocapitalize='none'><button>Revisar</button></form>"
+        if not q: return HTMLResponse(pagina("<h2>Revisio vocis</h2><p class='mut'>Compara el texto de una entrada con un corpus de unas 560.000 formas latinas declinadas y marca las palabras sospechosas de error de OCR, con candidatos de correcci\u00f3n. Son sugerencias, no certezas.</p>"+form,'','ambas','entrada'))
+        k=key(q);idx=None
+        for st in stems(k):
+            idx=BY.get(st)
+            if idx: break
+        if not idx: return HTMLResponse(pagina(form+"<p>Sin entrada.</p>",'','ambas','entrada'))
+        cu=[form]
+        for i in idx:
+            r=_rv.informe(D[i],D)
+            cu.append(f"<h3><a href='/entrada?n={i}'>{html.escape(D[i]['hw'])}</a> <small class='mut'>({len(r)} sospechosa(s))</small></h3><ul>"+''.join(f"<li><b>{html.escape(x['palabra'])}</b> <span class='mut'>[{x['capa']}]</span> …{html.escape(x['ctx'])}…<br>"+(' \u00b7 '.join(f"<i>{html.escape(a)}</i> <small class='mut'>({t})</small>" for a,t,f in x['sug']) or "<span class='mut'>sin candidato</span>")+"</li>" for x in r)+"</ul>")
+        return HTMLResponse(pagina(''.join(cu),'','ambas','entrada'))
     @mcp.custom_route("/leges",methods=["GET"])
     async def leges(request):
         cuerpo=["<h2>Leges et senatus consulta</h2><p class='mut'>Leyes y senadoconsultos romanos que cita el l\u00e9xico, con una breve descripci\u00f3n en espa\u00f1ol y las fuentes de donde sale (Instituciones, Digesto y Gayo en la edici\u00f3n de BIA; Wikipedia para las dem\u00e1s). Cada menci\u00f3n en el texto enlaza aqu\u00ed. Las voces citan esas leyes con variantes de OCR; las leyes con muchos hom\u00f3nimos (Cornelia, Iulia\u2026) no se incluyen todav\u00eda.</p>"]
