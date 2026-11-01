@@ -56,7 +56,7 @@ def montar(mcp,D,pagina,AUT,RXA):
         return ''
     @mcp.custom_route("/auctores",methods=["GET"])
     async def auctores(request):
-        li=''.join(f"<li><a href='/auctor?a={quote(a)}'><b>{html.escape(a)}</b></a>{(' <span class="mut">('+html.escape(VIDA[a])+')</span>') if a in VIDA else ''} <span class='mut'>{n} citas en {sum(1 for i in range(len(D)) if a in EA[i])} entradas</span><br><small>"+' · '.join(f"{html.escape(x)}. ({m})" for x,m in AB[a].most_common(5))+"</small></li>" for a,n in AUTH.most_common())
+        li=''.join(f"<li><a href='/auctor?a={quote(a)}'><b>{html.escape(a)}</b></a>{(' <span class="mut">('+html.escape(VIDA[a])+')</span>') if a in VIDA else ''} <span class='mut'>{n} citas en {sum(1 for i in range(len(D)) if a in EA[i])} entradas</span>"+(("<br><small>"+' · '.join(f"{html.escape(x)}. ({m})" for x,m in AB[a].most_common(5))+"</small>") if len(AB[a])>1 else '')+"</li>" for a,n in AUTH.most_common())
         return HTMLResponse(pagina("<h2>Auctores citati</h2><p class='mut'>Autores y eruditos citados por Brisson y Heineccio, por abreviatura del texto (OCR sin revisar). Pulsa un nombre para ver sus obras y las voces que lo citan. Entre paréntesis, las fechas de vida (nacimiento–muerte); «fl.» indica que solo se conoce su época, «c.» fechas aproximadas y «m.» solo el año de la muerte; los años sin indicación son d. C. Las fechas las he puesto yo de conocimiento general, no de una fuente enlazada; en los nombres ambiguos (Plinio, Séneca, Scaliger, Vossius, Gothofredus) se dan las dos identificaciones posibles.</p><ul>"+li+"</ul>",'','ambas','entrada'))
     @mcp.custom_route("/auctor",methods=["GET"])
     async def auctor(request):
