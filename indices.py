@@ -14,6 +14,8 @@ def _titulos(fn):
     return T
 def montar(mcp,D,pagina,AUT,RXA):
     from web import HTMLResponse
+    try: VIDA=json.load(open(os.path.join(AQUI,'datos','vidas.json'),encoding='utf-8'))
+    except Exception: VIDA={}
     OB=json.load(open(os.path.join(AQUI,'fuentes_obras.json'),encoding='utf-8'))
     DT=_titulos('dtitles.txt');CT=_titulos('ctitles.txt')
     EA=[collections.Counter() for _ in D]      # autores por entrada
@@ -54,15 +56,15 @@ def montar(mcp,D,pagina,AUT,RXA):
         return ''
     @mcp.custom_route("/auctores",methods=["GET"])
     async def auctores(request):
-        li=''.join(f"<li><a href='/auctor?a={quote(a)}'><b>{html.escape(a)}</b></a> <span class='mut'>{n} citas en {sum(1 for i in range(len(D)) if a in EA[i])} entradas</span><br><small>"+' · '.join(f"{html.escape(x)}. ({m})" for x,m in AB[a].most_common(5))+"</small></li>" for a,n in AUTH.most_common())
-        return HTMLResponse(pagina("<h2>Auctores citati</h2><p class='mut'>Autores y eruditos citados por Brisson y Heineccio, por abreviatura del texto (OCR sin revisar). Pulsa un nombre para ver sus obras y las voces que lo citan.</p><ul>"+li+"</ul>",'','ambas','entrada'))
+        li=''.join(f"<li><a href='/auctor?a={quote(a)}'><b>{html.escape(a)}</b></a>{(' <span class="mut">('+html.escape(VIDA[a])+')</span>') if a in VIDA else ''} <span class='mut'>{n} citas en {sum(1 for i in range(len(D)) if a in EA[i])} entradas</span><br><small>"+' · '.join(f"{html.escape(x)}. ({m})" for x,m in AB[a].most_common(5))+"</small></li>" for a,n in AUTH.most_common())
+        return HTMLResponse(pagina("<h2>Auctores citati</h2><p class='mut'>Autores y eruditos citados por Brisson y Heineccio, por abreviatura del texto (OCR sin revisar). Pulsa un nombre para ver sus obras y las voces que lo citan. Entre paréntesis, las fechas de vida (nacimiento–muerte); «fl.» indica que solo se conoce su época, «c.» fechas aproximadas y «m.» solo el año de la muerte; los años sin indicación son d. C. Las fechas las he puesto yo de conocimiento general, no de una fuente enlazada; en los nombres ambiguos (Plinio, Séneca, Scaliger, Vossius, Gothofredus) se dan las dos identificaciones posibles.</p><ul>"+li+"</ul>",'','ambas','entrada'))
     @mcp.custom_route("/auctor",methods=["GET"])
     async def auctor(request):
         a=(request.query_params.get('a') or '')
         if a not in AUTH: return HTMLResponse(pagina("<p>Autor no encontrado. <a href='/auctores'>Ver el índice de autores</a>.</p>",'','ambas','entrada'))
         idx=[i for i in range(len(D)) if a in EA[i]]
         ob=''.join(f"<tr><td>{html.escape(w)}.</td><td>{n}</td><td>{html.escape(obra_titulo(a,w))}</td></tr>" for w,n in WK[a].most_common(15) if n>=2)
-        cab=f"<h2>{html.escape(a)}</h2><p class='mut'>{AUTH[a]} citas en {len(idx)} voces. Abreviaturas: "+', '.join(f"{html.escape(x)}. ({m})" for x,m in AB[a].most_common(8))+"</p>"
+        cab=f"<h2>{html.escape(a)}</h2>"+(f"<p class='mut'>{html.escape(VIDA[a])}</p>" if a in VIDA else '')+f"<p class='mut'>{AUTH[a]} citas en {len(idx)} voces. Abreviaturas: "+', '.join(f"{html.escape(x)}. ({m})" for x,m in AB[a].most_common(8))+"</p>"
         if ob: cab+="<h3>Obras citadas</h3><table class='tb'><tr><th>Obra (abrev.)</th><th>Citas</th><th>Título</th></tr>"+ob+"</table>"
         g={}
         for i in idx: g.setdefault(re.sub(r'[^A-Z]','',D[i]['hw'].upper())[:1] or '#',[]).append(i)
