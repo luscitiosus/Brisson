@@ -35,6 +35,8 @@ article h2{font-size:1.25rem;margin:.8rem 0 .1rem}.meta{color:var(--mut);font-si
 .T .tag{color:var(--hein)}.C .tag{color:var(--cor)}
 .gr{background:var(--line);padding:0 .3em;border-radius:3px;font-size:.85em}
 .ref{color:var(--cor);font-size:.9em}
+a.ref{text-decoration:underline dotted}
+.hit{background:rgba(180,140,60,.25);padding:.2em .4em;border-left:3px solid var(--cor)}
 i{font-style:italic}details{margin:1.6rem 0;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:.2rem 1rem}summary{cursor:pointer;font-weight:600;padding:.6rem 0}.pf p{margin:.7rem 0;text-align:justify}.pf .pn{font:.75rem system-ui,sans-serif;color:var(--mut);display:block;margin-top:1rem}figure.fr{margin:.6rem auto 1rem;max-width:26rem;text-align:center}figure.fr img{width:100%;height:auto;border-radius:6px;border:1px solid var(--line)}figcaption{font-size:.78rem;color:var(--mut);margin-top:.3rem}button.vers{display:block;margin:1rem auto .2rem;padding:.55rem clamp(.5rem,3vw,1.4rem) .6rem;max-width:100%;text-align:center;cursor:pointer;color:#2b1d10;background:radial-gradient(ellipse at 50% 40%,#f3e6c8,#e3cf9f);border:1px solid #2b1d10;outline:3px double #2b1d10;outline-offset:-6px;border-radius:3px;box-shadow:0 1px 0 #fff8 inset,0 2px 4px #0004;font-family:Georgia,'Times New Roman',serif}
 button.vers .t{display:block;font-variant:small-caps;letter-spacing:.22em;font-size:1.05rem;font-weight:bold}
 button.vers .s:before{content:"\\2766\\00a0"}button.vers .s:after{content:"\\00a0\\2766"}
@@ -74,9 +76,18 @@ def _vid(t):
         if end>i:
             out.append(t[pos:m.start()]+I0+t[m.start():end]+I1);pos=end
     out.append(t[pos:]);return ''.join(out)
+_FUENTES=[None]
+_RR=re.compile(r'^(D|C|CTh|I)\.(\d+)\.(\d+)\.(\d+|ult)(?:\.?pr|\.(\d+|ult))?$')
+def _refl(m):
+    r=m.group(1);mm=_RR.match(html.unescape(r))
+    if not mm or not _FUENTES[0]: return f'<span class="ref">[{r}]</span>'
+    sig,b,t,l,p=mm.group(1),mm.group(2),mm.group(3),mm.group(4),mm.group(5)
+    dest='pr' if r.endswith('pr') else (p or '')
+    q=f"{sig}.{b}.{t}.{l}"+(f".{dest}" if dest else '')
+    return f'<a class="ref" href="/fons?r={q}" title="Leer el texto latino (BIA)">[{r}]</a>'
 def _fmt(t):
     t=html.escape(_vid(t))
-    t=re.sub(r'\[((?:D|C|CTh|I|N)\.[^\]]*)\]',r'<span class="ref">[\1]</span>',t)
+    t=re.sub(r'\[((?:D|C|CTh|I|N)\.[^\]]*)\]',_refl,t)
     t=t.replace('⟦griego⟧','<span class="gr" title="griego ilegible en el OCR: mira la imagen de la página">⟦griego⟧</span>')
     res=[];d=0
     for ch in t:
@@ -168,6 +179,26 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
         return HTMLResponse(pagina(_entrada(D[n],capa,imagen_url,n),'',capa,'entrada'))
     import indices
     indices.montar(mcp,D,pagina,_AUT,_RXA)
+    import romanos
+    _F=romanos.Fuentes()
+    _FUENTES[0]=_F if _F.ok() and _F.obras() else None
+    @mcp.custom_route("/fons",methods=["GET"])
+    async def fons(request):
+        r=request.query_params.get('r','');mm=_RR.match(r)
+        d=_FUENTES[0].leer(mm.group(1),'.'.join(x for x in r.split('.')[1:])) if (mm and _FUENTES[0]) else None
+        if not d:
+            return HTMLResponse(pagina(f"<article><h2>Fons non inuentus</h2><p>No encuentro <b>{html.escape(r)}</b> en la edición de BIA (la cita puede tener un error de OCR). <a href='javascript:history.back()'>&#9756; Redi</a></p></article>",'','ambas','entrada'),status_code=404)
+        dest=d['dest'];filas=[]
+        for et,tx in d['filas']:
+            e=html.escape(et);sel=False
+            if dest:
+                if dest=='pr': sel=et.endswith('pr')
+                else: sel=et.endswith('.'+dest)
+            filas.append(f"<p class='{'hit' if sel else ''}' lang='la'><span class='tag'>{e}</span> {html.escape(tx)}</p>")
+        ref=html.escape(r.replace('.',' ',0))
+        cab=f"<article><h2>{html.escape(d['obra'])} {html.escape(r.split('.',1)[1])}</h2><div class='meta'>{html.escape(d['tit'])}</div>"
+        pie="<p class='mut'>Texto: Bibliotheca Iuris Antiqui (IGSG-CNR), CC BY-NC-SA 4.0. Es lectura de la edición crítica; la numeración puede diferir de la del Brisson.</p><p><a href='javascript:history.back()'>&#9756; Redi ad vocem</a></p></article>"
+        return HTMLResponse(pagina(cab+''.join(filas)+pie,'','ambas','entrada'))
     @mcp.custom_route("/fortuita",methods=["GET"])
     async def fortuita(request):
         return RedirectResponse('/entrada?n='+str(random.choice(BIG)),status_code=302)
