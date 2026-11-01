@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: brisson-heineccio
+    runtime: docker
+    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      - key: MCP_SECRET
+        generateValue: true
