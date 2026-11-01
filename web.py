@@ -29,6 +29,17 @@ button.vers:hover,button.vers:focus{background:radial-gradient(ellipse at 50% 40
 .vmsg{text-align:center;font-size:.8rem;color:var(--mut);min-height:1.1em}
 a{color:var(--cor)}ul.c{columns:2;padding-left:1.1rem}.mut{color:var(--mut)}
 footer{margin-top:2rem;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8rem}
+
+nav.top{display:flex;gap:.4rem 1.1rem;flex-wrap:wrap;justify-content:center;font-variant:small-caps;letter-spacing:.12em;font-size:1rem;margin:.2rem 0 .6rem;padding:.35rem 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+nav.top a{text-decoration:none;color:var(--fg)}nav.top a:hover{color:var(--hein)}
+.pn2{display:flex;gap:.6rem;margin:1rem 0 .2rem}.pn2 .sp{flex:1}
+a.nv{flex:1 1 0;min-width:0;display:block;text-align:center;text-decoration:none;color:#2b1d10;padding:.45rem .5rem .5rem;background:radial-gradient(ellipse at 50% 40%,#f3e6c8,#e3cf9f);border:1px solid #2b1d10;outline:3px double #2b1d10;outline-offset:-5px;border-radius:3px;box-shadow:0 1px 0 #fff8 inset,0 2px 4px #0004;font-variant:small-caps;letter-spacing:.14em;font-size:1rem;font-weight:bold}
+a.nv small{display:block;font:italic .8rem Georgia,serif;letter-spacing:0;font-variant:normal;font-weight:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+a.nv:hover,a.nv:focus{background:radial-gradient(ellipse at 50% 40%,#2b1d10,#4a3320);color:#f3e6c8}
+.abc{display:flex;flex-wrap:wrap;gap:.3rem;justify-content:center;margin:.8rem 0}.abc a{min-width:2.1rem;text-align:center;padding:.25rem .3rem;border:1px solid var(--line);border-radius:4px;background:var(--card);text-decoration:none;font-weight:bold}
+.abc a small{display:block;font:.62rem system-ui,sans-serif;color:var(--mut);font-weight:normal}
+.vd{border:1px solid var(--hein);background:var(--hbg);border-radius:8px;padding:.4rem 1rem .8rem;margin:1rem 0}.vd h3{margin:.4rem 0;font-variant:small-caps;letter-spacing:.14em}
+details.ab>summary{font-size:1.1rem}details.ab details{margin:.4rem 0;padding:.1rem .8rem}
 @media(max-width:480px){body{font-size:17px}ul.c{columns:1}}
 """
 I0,I1='\ue000','\ue001'
@@ -64,7 +75,8 @@ def _fmt(t):
         else: res.append(ch)
     if d>0: res.append('</i>')
     return ''.join(res)
-def _entrada(e,capa,imagen_url):
+_D=[]
+def _entrada(e,capa,imagen_url,i=None):
     nT=sum(1 for s in e['segs'] if s['k']=='T');ng=e.get('ngr',0)
     out=[f"<article><h2>{html.escape(e['hw'])}</h2><div class='meta'>p. {e['page']} del PDF · "
          f"<a href='{html.escape(imagen_url(e['page']))}' target='_blank' rel='noopener'>ver la página</a>"
@@ -80,6 +92,10 @@ def _entrada(e,capa,imagen_url):
         "Mantén las citas completas, conserva la distinción entre Brisson y las notas de Heineccio y señala las palabras dudosas.\n\nEntrada: "+e['hw']+f" (p. {e['page']} del PDF)\n\n"
         +"\n\n".join(lab[s['k']]+' '+plain(s['t']) for s in e['segs']))
     out.append("<button type='button' class='vers' onclick='pedir(this)' data-p='"+html.escape(pr,quote=True)+"'><span class='s'>Versionem Hispanicam mihi da!</span></button><div class='vmsg'></div>")
+    if i is not None and _D:
+        a=f"<a class='nv' href='/entrada?n={i-1}'>&#9756; Vox prior<small>{html.escape(_D[i-1]['hw'])}</small></a>" if i>0 else "<span class='sp'></span>"
+        b=f"<a class='nv' href='/entrada?n={i+1}'>Vox posterior &#9758;<small>{html.escape(_D[i+1]['hw'])}</small></a>" if i<len(_D)-1 else "<span class='sp'></span>"
+        out.append(f"<div class='pn2'>{a}{b}</div>")
     out.append("</article>");return ''.join(out)
 PREF="""<details id="pref"><summary>Disertación del comienzo: Praefatio nova de J. H. Boehmer (De interpretationis grammaticae fatis et usu vario in iure Romano)</summary><div id="prefbox"><p class="mut">Cargando…</p><noscript><p><a href="/prefacio">Abrir el texto en una página aparte</a></p></noscript></div></details>
 <script>document.getElementById('pref').addEventListener('toggle',function(){if(this.open&&!this.dataset.ok){this.dataset.ok=1;fetch('/prefacio?fragmento=1').then(function(r){return r.text()}).then(function(h){document.getElementById('prefbox').innerHTML=h}).catch(function(){document.getElementById('prefbox').innerHTML='<p><a href="/prefacio">Abrir en página aparte</a></p>'})}})</script>"""
@@ -91,6 +107,7 @@ def pagina(cuerpo,q='',capa='ambas',modo='entrada'):
     sel=lambda v,x:' checked' if v==x else ''
     return f"""<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Brisson · léxico jurídico latino</title><style>{CSS}</style></head><body><main>
+<nav class="top"><a href="/">Quaerere</a><a href="/indice">Index vocum</a><a href="/fortuita">Vox fortuita</a></nav>
 <h1>Brisson, <i>De verborum quae ad ius pertinent significatione</i></h1>
 <p class="sub">Edición de Heineccio (Halle, 1743). Texto de OCR, con Brisson y Heineccio en capas distintas.</p>
 <figure class="fr"><img src="/portada.jpg" alt="Frontispicio grabado de la edición de 1743: retratos de Brisson y de Heineccio" width="900" height="806" loading="lazy"><figcaption>Frontispicio de la edición de 1743 (grabado de G. A. Gründler y Susang): Brisson y Heineccio. Imagen de la ULB Sachsen-Anhalt, Halle.</figcaption></figure>
@@ -113,6 +130,45 @@ def _prefacio(imagen_url):
 def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
     import os
     from starlette.responses import Response
+    import random,datetime
+    from starlette.responses import RedirectResponse
+    _D.clear();_D.extend(D)
+    def letra(hw):
+        c=re.sub(r'[^A-Z]','',hw.upper())[:1] or '#'
+        return {'J':'I','U':'V'}.get(c,c)
+    LET={}
+    for i,e in enumerate(D): LET.setdefault(letra(e['hw']),[]).append(i)
+    LETRAS=sorted(LET)
+    BIG=[i for i,e in enumerate(D) if sum(len(x['t']) for x in e['segs'])>400]
+    def abc(act=''):
+        return "<div class='abc'>"+''.join(f"<a href='/indice?letra={l}' title='{len(LET[l])} voces'>{l}<small>{len(LET[l])}</small></a>" for l in LETRAS)+"</div>"
+    @mcp.custom_route("/entrada",methods=["GET"])
+    async def entrada(request):
+        try: n=int(request.query_params.get('n','0'))
+        except ValueError: n=0
+        n=max(0,min(len(D)-1,n));capa=request.query_params.get('capa','ambas')
+        if capa not in('ambas','brisson','heineccio','corchetes'): capa='ambas'
+        return HTMLResponse(pagina(_entrada(D[n],capa,imagen_url,n),'',capa,'entrada'))
+    @mcp.custom_route("/fortuita",methods=["GET"])
+    async def fortuita(request):
+        return RedirectResponse('/entrada?n='+str(random.choice(BIG)),status_code=302)
+    @mcp.custom_route("/indice",methods=["GET"])
+    async def indice(request):
+        l=(request.query_params.get('letra') or '').upper()[:1]
+        if request.query_params.get('fragmento') and l in LET:
+            idx=LET[l]
+            if len(idx)<=120:
+                return HTMLResponse("<ul class='c'>"+''.join(f"<li><a href='/entrada?n={i}'>{html.escape(D[i]['hw'])}</a></li>" for i in idx)+"</ul>")
+            g={}
+            for i in idx: g.setdefault(re.sub(r'[^A-Z]','',D[i]['hw'].upper())[:2],[]).append(i)
+            return HTMLResponse(''.join(f"<details><summary>{html.escape(k)} <span class='mut'>({len(v)})</span></summary><ul class='c'>"+''.join(f"<li><a href='/entrada?n={i}'>{html.escape(D[i]['hw'])}</a></li>" for i in v)+"</ul></details>" for k,v in sorted(g.items())))
+        if l in LET:
+            idx=LET[l]
+            cuerpo=abc()+f"<h2>Littera {l} <span class='mut'>({len(idx)} voces)</span></h2><div id='fr'><p class='mut'>Cargando…</p></div><script>fetch('/indice?letra={l}&fragmento=1').then(function(r){{return r.text()}}).then(function(h){{document.getElementById('fr').innerHTML=h}})</script>"
+            return HTMLResponse(pagina(cuerpo,'','ambas','entrada'))
+        det=''.join(f"<details class='ab' data-l='{k}'><summary>{k} <span class='mut'>({len(LET[k])})</span></summary><div class='bx'></div></details>" for k in LETRAS)
+        js="<script>document.querySelectorAll('details.ab').forEach(function(d){d.addEventListener('toggle',function(){if(d.open&&!d.dataset.ok){d.dataset.ok=1;fetch('/indice?letra='+d.dataset.l+'&fragmento=1').then(function(r){return r.text()}).then(function(h){d.querySelector('.bx').innerHTML=h})}})})</script>"
+        return HTMLResponse(pagina(f"<p class='mut'>{len(D)} voces. Elige una letra o despliégala aquí abajo.</p>"+abc()+det+js,'','ambas','entrada'))
     @mcp.custom_route("/portada.jpg",methods=["GET"])
     async def portada(request):
         b=open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'portada.jpg'),'rb').read()
@@ -126,7 +182,11 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
     async def inicio(request):
         q=(request.query_params.get('q') or '').strip()[:80];capa=request.query_params.get('capa','ambas');modo=request.query_params.get('modo','entrada')
         if capa not in('ambas','brisson','heineccio','corchetes'): capa='ambas'
-        if not q: return HTMLResponse(pagina("<p class='mut'>Escribe una palabra para ver su entrada, o busca una palabra en todo el texto.</p>",q,capa,modo))
+        if not q:
+            hoy=datetime.date.today();n=BIG[(hoy.toordinal()*7919)%len(BIG)];e=D[n]
+            txt=re.sub(r'\s+',' ',e['segs'][0]['t'].replace(I0,'').replace(I1,''));txt=txt[:320]+('…' if len(txt)>320 else '')
+            vd=f"<div class='vd'><h3>Vox diei</h3><b>{html.escape(e['hw'])}</b> <span class='mut'>(p. {e['page']})</span><p lang='la'>{_fmt(txt)}</p><a href='/entrada?n={n}'>Lege totum &rarr;</a> · <a href='/fortuita'>Aliam vocem!</a></div>"
+            return HTMLResponse(pagina("<p class='mut'>Escribe una palabra para ver su entrada, busca en todo el texto, o recorre el índice por letras.</p>"+abc()+vd,q,capa,modo))
         if modo=='texto':
             rx=re.compile(''.join('[uv]' if c in 'uvUV' else '[ij]' if c in 'ijIJ' else re.escape(c) for c in q),re.I)
             res=[];total=0
@@ -145,7 +205,7 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
         for st in stems(k):
             idx=BY.get(st)
             if idx: break
-        if idx: return HTMLResponse(pagina(''.join(_entrada(D[i],capa,imagen_url) for i in idx),q,capa,modo))
+        if idx: return HTMLResponse(pagina(''.join(_entrada(D[i],capa,imagen_url,i) for i in idx),q,capa,modo))
         pref=[x for x in KEYS if x.startswith(stems(k)[-1])][:60] if k else []
         if pref:
             li=''.join(f"<li><a href='/?q={quote(D[BY[c][0]]['hw'])}'>{html.escape(D[BY[c][0]]['hw'])}</a></li>" for c in pref)
