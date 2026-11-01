@@ -30,7 +30,7 @@ button.vers:hover,button.vers:focus{background:radial-gradient(ellipse at 50% 40
 a{color:var(--cor)}ul.c{columns:2;padding-left:1.1rem}.mut{color:var(--mut)}
 footer{margin-top:2rem;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8rem}
 
-nav.top{display:flex;gap:.4rem 1.1rem;flex-wrap:wrap;justify-content:center;font-variant:small-caps;letter-spacing:.12em;font-size:1rem;margin:.2rem 0 .6rem;padding:.35rem 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+abbr.au{text-decoration:underline dotted var(--cor);text-underline-offset:3px;cursor:help}nav.top{display:flex;gap:.4rem 1.1rem;flex-wrap:wrap;justify-content:center;font-variant:small-caps;letter-spacing:.12em;font-size:1rem;margin:.2rem 0 .6rem;padding:.35rem 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 nav.top a{text-decoration:none;color:var(--fg)}nav.top a:hover{color:var(--hein)}
 .pn2{display:flex;gap:.6rem;margin:1rem 0 .2rem}.pn2 .sp{flex:1}
 a.nv{flex:1 1 0;min-width:0;display:block;text-align:center;text-decoration:none;color:#2b1d10;padding:.45rem .5rem .5rem;background:radial-gradient(ellipse at 50% 40%,#f3e6c8,#e3cf9f);border:1px solid #2b1d10;outline:3px double #2b1d10;outline-offset:-5px;border-radius:3px;box-shadow:0 1px 0 #fff8 inset,0 2px 4px #0004;font-variant:small-caps;letter-spacing:.14em;font-size:1rem;font-weight:bold}
@@ -107,7 +107,7 @@ def pagina(cuerpo,q='',capa='ambas',modo='entrada'):
     sel=lambda v,x:' checked' if v==x else ''
     return f"""<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Brisson · léxico jurídico latino</title><style>{CSS}</style></head><body><main>
-<nav class="top"><a href="/">Quaerere</a><a href="/indice">Index vocum</a><a href="/fortuita">Vox fortuita</a></nav>
+<nav class="top"><a href="/">Quaerere</a><a href="/indice">Index vocum</a><a href="/auctores">Auctores</a><a href="/fortuita">Vox fortuita</a></nav>
 <h1>Brisson, <i>De verborum quae ad ius pertinent significatione</i></h1>
 <p class="sub">Edición de Heineccio (Halle, 1743). Texto de OCR, con Brisson y Heineccio en capas distintas.</p>
 <figure class="fr"><img src="/portada.jpg" alt="Frontispicio grabado de la edición de 1743: retratos de Brisson y de Heineccio" width="900" height="806" loading="lazy"><figcaption>Frontispicio de la edición de 1743 (grabado de G. A. Gründler y Susang): Brisson y Heineccio. Imagen de la ULB Sachsen-Anhalt, Halle.</figcaption></figure>
@@ -130,7 +130,15 @@ def _prefacio(imagen_url):
 def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
     import os
     from starlette.responses import Response
-    import random,datetime
+    import random,datetime,json as _j
+    global _AUT,_RXA
+    _AUT=_j.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'fuentes.json'),encoding='utf-8'))
+    _RXA=re.compile(r'(?<![A-Za-zæ])('+'|'.join(sorted(map(re.escape,_AUT),key=len,reverse=True))+r')(?=\.)')
+    AC={};AE={}
+    for _i,_e in enumerate(D):
+        for _s in _e['segs']:
+            for _m in _RXA.finditer(_s['t'].replace(I0,'').replace(I1,'')):
+                _k=_AUT[_m.group(1)].split(' (')[0];AC.setdefault(_k,{}).setdefault(_m.group(1),0);AC[_k][_m.group(1)]+=1;AE.setdefault(_k,set()).add(_i)
     from starlette.responses import RedirectResponse
     _D.clear();_D.extend(D)
     def letra(hw):
@@ -149,6 +157,11 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
         n=max(0,min(len(D)-1,n));capa=request.query_params.get('capa','ambas')
         if capa not in('ambas','brisson','heineccio','corchetes'): capa='ambas'
         return HTMLResponse(pagina(_entrada(D[n],capa,imagen_url,n),'',capa,'entrada'))
+    @mcp.custom_route("/auctores",methods=["GET"])
+    async def auctores(request):
+        L=sorted(AC.items(),key=lambda kv:-sum(kv[1].values()))
+        li=''.join(f"<li><b>{html.escape(k)}</b> <span class='mut'>{sum(v.values())} citas en {len(AE[k])} entradas</span><br><small>"+' · '.join(f"<a href='/?q={quote(a)}.&modo=texto'>{html.escape(a)}. ({n})</a>" for a,n in sorted(v.items(),key=lambda x:-x[1])[:6])+"</small></li>" for k,v in L)
+        return HTMLResponse(pagina("<h2>Auctores citati</h2><p class='mut'>Autores y eruditos citados por Brisson y Heineccio, agrupados por la abreviatura del texto (OCR sin revisar). Pulsa una abreviatura para ver sus pasajes.</p><ul>"+li+"</ul>",'','ambas','entrada'))
     @mcp.custom_route("/fortuita",methods=["GET"])
     async def fortuita(request):
         return RedirectResponse('/entrada?n='+str(random.choice(BIG)),status_code=302)
