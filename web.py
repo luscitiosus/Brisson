@@ -76,22 +76,24 @@ def _fmt(t):
     if d>0: res.append('</i>')
     return ''.join(res)
 _D=[]
-def _navbtn(i):
-    a=f"<a class='nv' href='/entrada?n={i-1}'>&#9756; Vox prior<small>{html.escape(_D[i-1]['hw'])}</small></a>" if i>0 else "<span class='sp'></span>"
-    b=f"<a class='nv' href='/entrada?n={i+1}'>Vox posterior &#9758;<small>{html.escape(_D[i+1]['hw'])}</small></a>" if i<len(_D)-1 else "<span class='sp'></span>"
-    return f"<div class='pn2'>{a}{b}</div>"
+def _navbtn(i,lado):
+    if lado=='prior':
+        h=f"<a class='nv' href='/entrada?n={i-1}'>&#9756; Vox prior<small>{html.escape(_D[i-1]['hw'])}</small></a>" if i>0 else ''
+    else:
+        h=f"<a class='nv' href='/entrada?n={i+1}'>Vox posterior &#9758;<small>{html.escape(_D[i+1]['hw'])}</small></a>" if i<len(_D)-1 else ''
+    return f"<div class='pn2'>{h}</div>" if h else ''
 def _entrada(e,capa,imagen_url,i=None):
     nT=sum(1 for s in e['segs'] if s['k']=='T');ng=e.get('ngr',0)
     out=[f"<article><h2>{html.escape(e['hw'])}</h2><div class='meta'>p. {e['page']} del PDF · "
          f"<a href='{html.escape(imagen_url(e['page']))}' target='_blank' rel='noopener'>ver la página</a>"
          +(f" · {ng} pasaje(s) en griego" if ng else "")+f" · {nT} tramo(s) con nota de Heineccio</div>"]
-    if i is not None and _D: out.append(_navbtn(i))
+    if i is not None and _D: out.append(_navbtn(i,'prior'))
     for s in e['segs']:
         k=s['k']
         if capa=='brisson' and k!='B' or capa=='heineccio' and k!='T' or capa=='corchetes' and k!='C': continue
         tag={'T':'Tramo que termina en HEIN. (nota de Heineccio)','B':'Brisson','C':'Entre corchetes en la edición'}[k]
         out.append(f"<div class='seg {k}' lang='la'><span class='tag'>{tag}</span>{_fmt(s.get('h',s['t']))}</div>")
-    if i is not None and _D: out.append(_navbtn(i))
+    if i is not None and _D: out.append(_navbtn(i,'posterior'))
     out.append("</article>");return ''.join(out)
 PREF="""<details id="pref"><summary>Dissertatio praeuia: Praefatio noua Io. Henrici Boehmeri (De interpretationis grammaticae fatis et usu vario in iure Romano)</summary><div id="prefbox"><p class="mut">Cargando…</p><noscript><p><a href="/prefacio">Abrir el texto en una página aparte</a></p></noscript></div></details>
 <script>document.getElementById('pref').addEventListener('toggle',function(){if(this.open&&!this.dataset.ok){this.dataset.ok=1;fetch('/prefacio?fragmento=1').then(function(r){return r.text()}).then(function(h){document.getElementById('prefbox').innerHTML=h}).catch(function(){document.getElementById('prefbox').innerHTML='<p><a href="/prefacio">Abrir en página aparte</a></p>'})}})</script>"""
