@@ -1,5 +1,6 @@
 """Página web de consulta (sin Claude) para el léxico de Brisson: / (buscador), con paginación mínima y sin JavaScript."""
 import html,re,collections
+import json as _j
 from urllib.parse import quote
 from starlette.responses import HTMLResponse as _HR
 _LIG=re.compile(r'ae|AE|Ae|aE')
@@ -269,6 +270,36 @@ def _lexpanel(hw):
     except Exception: pass
     h.append(f"<p class='mut'>Lewis &amp; Short, <i>A Latin Dictionary</i> (1879), y Lewis, <i>An Elementary Latin Dictionary</i> (1890), en la edici\u00f3n digital de la Perseus Digital Library (<a href='https://github.com/PerseusDL/lexica' target='_blank' rel='noopener'>PerseusDL/lexica</a>, CC BY-SA 4.0). Las entradas se ordenan poniendo primero las de sentido jur\u00eddico; \u2696 marca los sentidos con vocabulario jur\u00eddico. La voz se ha buscado por su lema probable; comp\u00e1rala con el texto de Brisson.</p>")
     return f"<details class='lxp'><summary>Lexica: Lewis &amp; Short <small class='mut'>(s.v. {html.escape(lss[0]['k'] if lss else v['el'][0]['k'])})</small></summary>"+''.join(h)+f"<p><a href='/lexicon?l={k}'>Abrir el lema <i>{html.escape(k)}</i> en p\u00e1gina aparte</a></p></details>"
+_CO=[None]
+_RCO=re.compile(r"\[((?:D|C|CTh)\.\d+\.\d+\.\d+)[^\]]*\]")
+def _cocitas(i):
+    """Entradas de Brisson que citan los mismos pasajes (D./C.) que la entrada i."""
+    if _CO[0] is None:
+        idx={};ref=[]
+        for j,e in enumerate(_D):
+            r=set(_RCO.findall(' '.join(s['t'] for s in e['segs'])));ref.append(r)
+            for x in r: idx.setdefault(x,set()).add(j)
+        _CO[0]=(idx,ref)
+    idx,ref=_CO[0]
+    if i>=len(ref) or not ref[i]: return ''
+    c={}
+    for x in ref[i]:
+        for j in idx[x]:
+            if j!=i and _D[j]['hw']!=_D[i]['hw']: c.setdefault(j,[]).append(x)
+    if not c: return ''
+    top=sorted(c.items(),key=lambda t:(-len(t[1]),t[0]))[:12]
+    return "<details class='lxp'><summary>Voces que citan los mismos pasajes <small class='mut'>("+str(len(c))+")</small></summary><p>"+' '.join(f"<a href='/entrada?n={j}' title='{html.escape(', '.join(sorted(v)[:6]))}'>{html.escape(_D[j]['hw'])}</a><small class='mut'>\u00d7{len(v)}</small>" for j,v in top)+"</p><p class='mut'>Se cuentan los pasajes del Digesto y del C\u00f3digo que ambas entradas citan; pasa el cursor (o mant\u00e9n pulsado) sobre una voz para ver cu\u00e1les.</p></details>"
+def _herramientas(e,i):
+    hw=html.escape(e['hw']);pg=e['page']
+    cita=f"Brisson, B., <i>De verborum quae ad ius pertinent significatione</i>, ed. I. G. Heineccius, Halle, 1743, s. v. {hw}, p. {pg} del PDF."
+    plano=f"Brisson, B., De verborum quae ad ius pertinent significatione, ed. I. G. Heineccius, Halle, 1743, s. v. {e['hw']}, p. {pg} del PDF."
+    k=f"nota:{e['hw']}"
+    return (f"<details class='lxp'><summary>Citar y anotar</summary><p lang='es'>{cita}</p>"
+            f"<p><button type='button' onclick=\"navigator.clipboard&&navigator.clipboard.writeText({html.escape(_j.dumps(plano))});this.textContent='Copiado'\">Copiar cita</button></p>"
+            f"<p><b>Mis notas</b> <small class='mut'>(se guardan solo en este navegador)</small></p>"
+            f"<textarea id='nt' rows='5' style='width:100%;box-sizing:border-box' placeholder='Notas sobre esta voz\u2026'></textarea>"
+            f"<p><a href='/notae'>Ver y exportar todas mis notas</a></p>"
+            f"<script>(function(){{var t=document.getElementById('nt'),k={_j.dumps(k)};try{{t.value=localStorage.getItem(k)||''}}catch(e){{}}t.addEventListener('input',function(){{try{{if(t.value)localStorage.setItem(k,t.value);else localStorage.removeItem(k)}}catch(e){{}}}})}})();</script></details>")
 def _entrada(e,capa,imagen_url,i=None):
     nT=sum(1 for s in e['segs'] if s['k']=='T');ng=e.get('ngr',0)
     out=[f"<article><h2>{html.escape(e['hw'])}</h2><div class='meta'>p. {e['page']} del PDF · "
@@ -281,6 +312,10 @@ def _entrada(e,capa,imagen_url,i=None):
         tag={'T':'Tramo que termina en HEIN. (nota de Heineccio)','B':'Brisson','C':'Entre corchetes en la edición'}[k]
         out.append(f"<div class='seg {k}' lang='la'><span class='tag'>{tag}</span>{_fmt(s.get('h',s['t']))}</div>")
     out.append(_lexpanel(e['hw']))
+    if i is not None and _D:
+        try: out.append(_cocitas(i))
+        except Exception: pass
+        out.append(_herramientas(e,i))
     if i is not None and _D: out.append(_navbtn(i,'posterior'))
     out.append("</article>");return ''.join(out)
 PREF="""<details id="pref"><summary><b>Io. Henricus Boehmerus</b>, <i>Præfatio noua de interpretationis grammaticæ fatis et usu vario in iure Romano</i></summary><div id="prefbox"><p class="mut">Cargando…</p><noscript><p><a href="/prefacio">Abrir el texto en una página aparte</a></p></noscript></div></details>
@@ -350,6 +385,10 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
     try: _XIIES.update(_j.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'datos','xii_es.json'),encoding='utf-8')))
     except Exception: pass
     _LXT={}
+    @mcp.custom_route("/notae",methods=["GET"])
+    async def notae(request):
+        h="<article><h2>Notae meae</h2><p class='mut'>Tus notas, guardadas solo en este navegador (no est\u00e1n en el servidor).</p><div id='nl'></div><p><button type='button' id='cp'>Copiar todas</button></p><script>(function(){var d=document.getElementById('nl'),o=[];try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k.indexOf('nota:')==0)o.push([k.slice(5),localStorage.getItem(k)])}}catch(e){}o.sort();if(!o.length)d.innerHTML='<p>Todav\u00eda no hay notas.</p>';var tx=o.map(function(x){return x[0]+'\\n'+x[1]}).join('\\n\\n');o.forEach(function(x){var p=document.createElement('div');var b=document.createElement('b');b.textContent=x[0];var q=document.createElement('p');q.style.whiteSpace='pre-wrap';q.textContent=x[1];p.appendChild(b);p.appendChild(q);d.appendChild(p)});document.getElementById('cp').onclick=function(){navigator.clipboard&&navigator.clipboard.writeText(tx);this.textContent='Copiado'}})();</script><p><a href='javascript:history.back()'>&#9756; Redi</a></p></article>"
+        return HTMLResponse(pagina(h,'','ambas','entrada'))
     @mcp.custom_route("/lexicon",methods=["GET"])
     async def lexicon(request):
         import lexica
