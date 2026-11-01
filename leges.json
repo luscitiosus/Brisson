@@ -254,5 +254,197 @@
     "u": "/fons?r=D.14.2.1.pr"
    }
   ]
+ },
+ {
+  "id": "cornelia-sicariis",
+  "nombre": "Lex Cornelia de sicariis et veneficis",
+  "tipo": "ley",
+  "rx": "Cornel\\w*\\s+de\\s+(?:sicari\\w*|venefic\\w*)",
+  "solo_prefijo": false,
+  "desc": "Ley de Sila (81 a. C.) que creó una quaestio perpetua contra homicidas (sicarii), envenenadores y quienes portaran armas con intención de matar o robar. Fue la base del derecho penal romano del homicidio.",
+  "fuentes": [
+   {
+    "t": "Digesto 48.8.1",
+    "u": "/fons?r=D.48.8.1"
+   },
+   {
+    "t": "Wikipedia: Lex Cornelia de sicariis et veneficis",
+    "u": "https://en.wikipedia.org/wiki/Lex_Cornelia_de_sicariis_et_veneficis"
+   }
+  ]
+ },
+ {
+  "id": "cornelia-falsis",
+  "nombre": "Lex Cornelia de falsis (testamentaria nummaria)",
+  "tipo": "ley",
+  "rx": "Cornel\\w*\\s+(?:de\\s+fals\\w*|testament\\w*|nummari\\w*)",
+  "solo_prefijo": false,
+  "desc": "Ley de Sila (81 a. C.) que castigó la falsificación de testamentos y de moneda y, por extensión, otras falsedades documentales. Por eso se la cita también como lex Cornelia testamentaria o nummaria.",
+  "fuentes": [
+   {
+    "t": "Digesto 48.10.1",
+    "u": "/fons?r=D.48.10.1"
+   },
+   {
+    "t": "Wikipedia: Lex Cornelia de falsis",
+    "u": "https://en.wikipedia.org/wiki/Lex_Cornelia_de_falsis"
+   }
+  ]
+ },
+ {
+  "id": "cornelia-iniuriis",
+  "nombre": "Lex Cornelia de iniuriis",
+  "tipo": "ley",
+  "rx": "Cornel\\w*\\s+de\\s+iniuri\\w*",
+  "solo_prefijo": false,
+  "desc": "Ley de Sila que dio acción por injurias graves: golpear o azotar a alguien y entrar por la fuerza en su casa. Es el origen de la acción penal por iniuria distinta de la del edicto pretorio.",
+  "fuentes": [
+   {
+    "t": "Digesto 47.10.5",
+    "u": "/fons?r=D.47.10.5"
+   }
+  ]
+ },
+ {
+  "id": "cornelia",
+  "nombre": "Lex Cornelia (varias; sin especificar)",
+  "tipo": "ley",
+  "rx": "Cornel\\w*(?!\\w)(?!\\s+(?:de\\s+)?(?:sicar|venef|fals|iniur|testament|nummar))",
+  "solo_prefijo": false,
+  "desc": "Varias leyes de Cornelio Sila (81 a. C.) llevan este nombre: de sicariis et veneficis (homicidio y envenenamiento), de falsis (falsedades; testamentaria y nummaria) y de iniuriis. Cuando el texto dice solo «lex Cornelia» el contexto decide cuál es; en otros pasajes se trata de leyes cornelianas sobre sucesiones o tribunado.",
+  "fuentes": [
+   {
+    "t": "Digesto 48.8, De sicariis",
+    "u": "/fons?r=D.48.8.1"
+   },
+   {
+    "t": "Digesto 48.10, De falsis",
+    "u": "/fons?r=D.48.10.1"
+   }
+  ]
+ },
+ {
+  "id": "iulia-adulteriis",
+  "nombre": "Lex Iulia de adulteriis coercendis",
+  "tipo": "ley",
+  "rx": "Iuli\\w*\\s+(?:de\\s+)?adulteri\\w*",
+  "solo_prefijo": false,
+  "desc": "Ley de Augusto (18 a. C.) que convirtió el adulterio en delito público juzgado por una quaestio, con penas de relegación y pérdida parcial de bienes, y reguló la acusación por el padre, el marido o terceros.",
+  "fuentes": [
+   {
+    "t": "Digesto 48.5.1",
+    "u": "/fons?r=D.48.5.1"
+   },
+   {
+    "t": "Wikipedia: Lex Julia de adulteriis coercendis",
+    "u": "https://en.wikipedia.org/wiki/Lex_Julia_de_adulteriis_coercendis"
+   }
+  ]
+ },
+ {
+  "id": "iulia-vi",
+  "nombre": "Lex Iulia de vi publica et privata",
+  "tipo": "ley",
+  "rx": "Iuli\\w*\\s+de\\s+vi\\b\\w*",
+  "solo_prefijo": false,
+  "desc": "Leyes de Julio César o de Augusto que castigaron la violencia: de vi publica (contra el magistrado o el Estado) y de vi privata (violencia armada contra particulares).",
+  "fuentes": [
+   {
+    "t": "Digesto 48.6.1",
+    "u": "/fons?r=D.48.6.1"
+   },
+   {
+    "t": "Digesto 48.7.1",
+    "u": "/fons?r=D.48.7.1"
+   }
+  ]
+ },
+ {
+  "id": "iulia-maiestatis",
+  "nombre": "Lex Iulia maiestatis",
+  "tipo": "ley",
+  "rx": "Iuli\\w*\\s+(?:de\\s+)?(?:maiestat\\w*|maest\\w*)",
+  "solo_prefijo": false,
+  "desc": "Ley de Julio César (o de Augusto) sobre el crimen de lesa majestad: actos contra la seguridad del pueblo romano y, después, contra el emperador.",
+  "fuentes": [
+   {
+    "t": "Digesto 48.4.1",
+    "u": "/fons?r=D.48.4.1"
+   }
+  ]
+ },
+ {
+  "id": "iulia-repetundis",
+  "nombre": "Lex Iulia repetundarum",
+  "tipo": "ley",
+  "rx": "Iuli\\w*\\s+(?:de\\s+)?repetund\\w*",
+  "solo_prefijo": false,
+  "desc": "Ley de Julio César (59 a. C.) contra la concusión de magistrados y gobernadores de provincia, que permitía reclamar lo exigido ilegalmente (pecuniae repetundae).",
+  "fuentes": [
+   {
+    "t": "Digesto 48.11.1",
+    "u": "/fons?r=D.48.11.1"
+   }
+  ]
+ },
+ {
+  "id": "iulia-ambitu",
+  "nombre": "Lex Iulia de ambitu",
+  "tipo": "ley",
+  "rx": "Iuli\\w*\\s+de\\s+ambit\\w*",
+  "solo_prefijo": false,
+  "desc": "Ley de Augusto contra la corrupción electoral (ambitus), que reforzó las normas republicanas contra la compra de votos.",
+  "fuentes": [
+   {
+    "t": "Digesto 48.14.1",
+    "u": "/fons?r=D.48.14.1"
+   }
+  ]
+ },
+ {
+  "id": "iulia-peculatus",
+  "nombre": "Lex Iulia peculatus",
+  "tipo": "ley",
+  "rx": "Iuli\\w*\\s+(?:de\\s+)?pecula\\w*",
+  "solo_prefijo": false,
+  "desc": "Ley que castigó el peculado: apropiarse de dinero público o sagrado.",
+  "fuentes": [
+   {
+    "t": "Digesto 48.13.1",
+    "u": "/fons?r=D.48.13.1"
+   }
+  ]
+ },
+ {
+  "id": "iulia-dotali",
+  "nombre": "Lex Iulia de fundo dotali",
+  "tipo": "ley",
+  "rx": "Iuli\\w*\\s+de\\s+fundo\\s+dotal\\w*",
+  "solo_prefijo": false,
+  "desc": "Ley de Augusto que prohibió al marido enajenar el fundo dotal italiano contra la voluntad de la mujer y hipotecarlo incluso con su consentimiento.",
+  "fuentes": [
+   {
+    "t": "Gayo 2.63",
+    "u": "/fons?r=Gai.2.63"
+   }
+  ]
+ },
+ {
+  "id": "iulia",
+  "nombre": "Lex Iulia (varias; sin especificar)",
+  "tipo": "ley",
+  "rx": "Iuli\\w*(?!\\w)(?!\\s+(?:de\\s+)?(?:adulter|vi\\b|maiest|maest|repetund|ambit|pecula|fundo)|\\s+et\\s+Pap)",
+  "solo_prefijo": false,
+  "desc": "Varias leyes de Julio César y de Augusto llevan este nombre: de adulteriis coercendis, de vi publica y privata, de maiestate, de repetundis, de ambitu, de fundo dotali, iudiciaria, de maritandis ordinibus (con la Papia Poppaea) y otras. Cuando el texto dice solo «lex Iulia» el contexto decide cuál es.",
+  "fuentes": [
+   {
+    "t": "Digesto 48.5, De adulteriis",
+    "u": "/fons?r=D.48.5.1"
+   },
+   {
+    "t": "Digesto 48.6, De vi publica",
+    "u": "/fons?r=D.48.6.1"
+   }
+  ]
  }
 ]

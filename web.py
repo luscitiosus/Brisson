@@ -151,15 +151,14 @@ def _lex_cargar(L):
             core=rx.replace(r"|Vell\.","")
             sin=re.compile(r"(?<![A-Za-z\u00e6])(?=[A-Za-z\u00e6]*ian)(?:"+core+r")(?<!ianus)(?![A-Za-z\u00e6])")
         _LEXS.append((x,con,sin))
+_SPL=re.compile(r'(<a\b.*?</a>|<[^>]+>)')
 def _lexl(t):
     if not _LEXS: return t
     for x,con,sin in _LEXS:
-        tt=x['nombre']
+        tt=html.escape(x['nombre'],quote=True)
         rep=lambda m:f'<a class="lex" href="/leges#{x["id"]}" title="{tt}">{m.group(0)}</a>'
-        t=con.sub(rep,t)
-        if sin:
-            parts=re.split(r'(<a class="lex".*?</a>|<[^>]+>)',t)
-            t=''.join(p if i%2 else sin.sub(rep,p) for i,p in enumerate(parts))
+        for rx in ((con,sin) if sin else (con,)):
+            t=''.join(p if i%2 else rx.sub(rep,p) for i,p in enumerate(_SPL.split(t)))
     return t
 _RR=re.compile(r'^(D|C|CTh|I)\.(\d+)\.(\d+)\.(\d+|ult)(?:\.?pr|\.(\d+|ult))?$|^(PS)\.(\d+)\.(\d+)(?:\.(\d+))?$')
 def _refl(m):
@@ -325,7 +324,7 @@ def pagina(cuerpo,q='',capa='ambas',modo='entrada'):
     sel=lambda v,x:' checked' if v==x else ''
     return f"""<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Brisson · léxico jurídico latino</title><style>{CSS}</style></head><body><main>
-<nav class="top"><a href="/">Quaerere</a><a href="/indice">Index vocum</a><a href="/auctores">Auctores</a><a href="/tabula">Tabula</a><a href="/loci">Loci</a><a href="/leges">Leges</a><a href="/fortuita">Vox fortuita</a></nav>
+<nav class="top"><a href="/">Quaerere</a><a href="/indice">Index vocum</a><a href="/auctores">Auctores</a><a href="/tabula">Tabula</a><a href="/loci">Loci</a><a href="/leges">Leges</a><a href="/tabulae">XII Tab.</a><a href="/lexicon">Lexicon</a><a href="/notae">Notae</a><a href="/fortuita">Vox fortuita</a></nav>
 <h1>Brisson, <i>De verborum quae ad ius pertinent significatione</i></h1>
 <p class="sub">Edición de Heineccio (Halle, 1743). Texto de OCR, con Brisson y Heineccio en capas distintas.</p>
 <figure class="fr"><img src="/portada.jpg" alt="Frontispicio grabado de la edición de 1743: retratos de Brisson y de Heineccio" width="900" height="806" loading="lazy"><figcaption>Frontispicio de la edición de 1743 (grabado de G. A. Gründler y Susang): Brisson y Heineccio. Imagen de la ULB Sachsen-Anhalt, Halle.</figcaption></figure>
@@ -487,7 +486,7 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
         return HTMLResponse(pagina(''.join(cu),'','ambas','entrada'))
     @mcp.custom_route("/leges",methods=["GET"])
     async def leges(request):
-        cuerpo=["<h2>Leges et senatus consulta</h2><p class='mut'>Leyes y senadoconsultos romanos que cita el l\u00e9xico, con una breve descripci\u00f3n en espa\u00f1ol y las fuentes de donde sale (Instituciones, Digesto y Gayo en la edici\u00f3n de BIA; Wikipedia para las dem\u00e1s). Cada menci\u00f3n en el texto enlaza aqu\u00ed. Las voces citan esas leyes con variantes de OCR; las leyes con muchos hom\u00f3nimos (Cornelia, Iulia\u2026) no se incluyen todav\u00eda.</p>"]
+        cuerpo=["<h2>Leges et senatus consulta</h2><p class='mut'>Leyes y senadoconsultos romanos que cita el l\u00e9xico, con una breve descripci\u00f3n en espa\u00f1ol y las fuentes de donde sale (Instituciones, Digesto y Gayo en la edici\u00f3n de BIA; Wikipedia para las dem\u00e1s). Cada menci\u00f3n en el texto enlaza aqu\u00ed. Las voces citan esas leyes con variantes de OCR. Las leyes homónimas (Cornelia, Iulia) se distinguen por su especificación («de sicariis», «de adulteriis»…); cuando el texto dice solo «lex Cornelia» o «lex Iulia» se enlaza a una ficha general que remite a las específicas.</p>"]
         if not _LEXV:
             tmp={}
             for x,con,sin in _LEXS:
