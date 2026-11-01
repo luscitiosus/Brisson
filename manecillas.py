@@ -1,6 +1,6 @@
 """Detecta las manecillas (☞/☜) del margen del Brisson-Heineccio 1743: marcan la línea donde empieza cada adición de Heineccio.
 Requisitos: poppler (pdftoppm, pdftotext) en el PATH, y `pip install opencv-python numpy`.
-Uso:  python manecillas.py brisson.pdf salida.json [--desde 1] [--hasta 1500] [--procesos 4]
+Uso:  python manecillas.py brisson.pdf salida.json [--desde 1] [--hasta 1500] [--procesos 4]  (si se corta, vuelve a lanzar el mismo comando: reanuda desde salida.json.parcial)
 Salida: lista de {pagina, lado, score, linea} (la línea impresa a la que apunta la manecilla)."""
 import argparse,json,os,re,subprocess,sys,tempfile
 from concurrent.futures import ProcessPoolExecutor
@@ -10,7 +10,7 @@ TPL=cv2.imread(os.path.join(AQUI,'manecilla_izq.png'),0)
 TPD=cv2.imread(os.path.join(AQUI,'manecilla_der.png'),0)
 DPI=200
 def lineas(pdf,n):
-    x=subprocess.run(['pdftotext','-f',str(n),'-l',str(n),'-bbox-layout',pdf,'-'],capture_output=True,text=True,encoding='utf-8').stdout
+    x=subprocess.run(['pdftotext','-f',str(n),'-l',str(n),'-bbox-layout',pdf,'-'],capture_output=True,text=True,encoding='utf-8',timeout=60).stdout
     pw,ph=[float(v) for v in re.search(r'<page width="([\d.]+)" height="([\d.]+)"',x).groups()]
     L=[]
     for m in re.finditer(r'<line xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">(.*?)</line>',x,re.S):
@@ -24,16 +24,23 @@ def detecta(img):
         for s in esc:
             tt=cv2.resize(t,None,fx=s,fy=s,interpolation=cv2.INTER_AREA)
             r=cv2.matchTemplate(img,tt,cv2.TM_CCOEFF_NORMED)
+            r=np.nan_to_num(r,nan=0.0,posinf=0.0,neginf=0.0)
             ys,xs=np.where(r>=thr)
+            if len(ys)>400:   # página casi uniforme o con trama: quedarse con las mejores coincidencias
+                o=np.argsort(r[ys,xs])[-400:];ys,xs=ys[o],xs[o]
             res+=[(float(r[y,x]),lado,x+tt.shape[1]/2,y+tt.shape[0]/2) for y,x in zip(ys,xs)]
-    res.sort(reverse=True);keep=[]
+    res.sort(reverse=True);res=res[:1500];keep=[]
     for sc,lado,cx,cy in res:
         if all(abs(cx-k[2])>40 or abs(cy-k[3])>25 for k in keep): keep.append((sc,lado,cx,cy))
     return keep
 def pagina(args):
+    try: return _pagina(args)
+    except Exception as e:
+        print('página',args[1],'saltada:',type(e).__name__,e,file=sys.stderr,flush=True);return [{'pagina':args[1],'error':str(e)[:80]}]
+def _pagina(args):
     pdf,n=args
     with tempfile.TemporaryDirectory() as d:
-        subprocess.run(['pdftoppm','-r',str(DPI),'-f',str(n),'-l',str(n),'-gray','-png',pdf,os.path.join(d,'p')],check=True)
+        subprocess.run(['pdftoppm','-r',str(DPI),'-f',str(n),'-l',str(n),'-gray','-png',pdf,os.path.join(d,'p')],check=True,timeout=90)
         f=[x for x in os.listdir(d) if x.endswith('.png')][0]
         img=cv2.imread(os.path.join(d,f),0)
     pw,ph,L=lineas(pdf,n)
@@ -55,10 +62,19 @@ if __name__=='__main__':
     if not a.hasta:
         info=subprocess.run(['pdfinfo',a.pdf],capture_output=True,text=True).stdout
         a.hasta=int(re.search(r'Pages:\s+(\d+)',info).group(1))
-    res=[]
+    res=[];hechas=set()
+    if os.path.exists(a.salida+'.parcial'):   # reanudar
+        for l in open(a.salida+'.parcial',encoding='utf-8'):
+            o=json.loads(l);res.append(o);hechas.add(o['pagina'])
+        print('reanudando:',len(hechas),'páginas ya hechas',file=sys.stderr)
+    par=open(a.salida+'.parcial','a',encoding='utf-8')
+    pend=[n for n in range(a.desde,a.hasta+1) if n not in hechas]
     with ProcessPoolExecutor(a.procesos) as ex:
-        for i,o in enumerate(ex.map(pagina,[(a.pdf,n) for n in range(a.desde,a.hasta+1)]),a.desde):
+        for i,o in enumerate(ex.map(pagina,[(a.pdf,n) for n in pend]),0):
             res+=o
-            if i%50==0: print('página',i,len(res),'manecillas',file=sys.stderr,flush=True)
+            for x in o: par.write(json.dumps(x,ensure_ascii=False)+'\n')
+            par.flush()
+            if i%10==0: print('hechas',i,len(res),'manecillas',file=sys.stderr,flush=True)
     json.dump(res,open(a.salida,'w',encoding='utf-8'),ensure_ascii=False,indent=1)
-    print(len(res),'manecillas;',sum(1 for r in res if not r['linea']),'sin línea asignada')
+    res=[r for r in res if 'error' not in r or True]
+    print(len(res),'manecillas;',sum(1 for r in res if 'error' not in r and not r['linea']),'sin línea asignada')
