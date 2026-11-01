@@ -21,7 +21,7 @@ article h2{font-size:1.25rem;margin:.8rem 0 .1rem}.meta{color:var(--mut);font-si
 .T .tag{color:var(--hein)}.C .tag{color:var(--cor)}
 .gr{background:var(--line);padding:0 .3em;border-radius:3px;font-size:.85em}
 .ref{color:var(--cor);font-size:.9em}
-i{font-style:italic}details{margin:1.6rem 0;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:.2rem 1rem}summary{cursor:pointer;font-weight:600;padding:.6rem 0}.pf p{margin:.7rem 0;text-align:justify}.pf .pn{font:.75rem system-ui,sans-serif;color:var(--mut);display:block;margin-top:1rem}a{color:var(--cor)}ul.c{columns:2;padding-left:1.1rem}.mut{color:var(--mut)}
+i{font-style:italic}details{margin:1.6rem 0;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:.2rem 1rem}summary{cursor:pointer;font-weight:600;padding:.6rem 0}.pf p{margin:.7rem 0;text-align:justify}.pf .pn{font:.75rem system-ui,sans-serif;color:var(--mut);display:block;margin-top:1rem}figure.fr{margin:.6rem auto 1rem;max-width:26rem;text-align:center}figure.fr img{width:100%;height:auto;border-radius:6px;border:1px solid var(--line)}figcaption{font-size:.78rem;color:var(--mut);margin-top:.3rem}a{color:var(--cor)}ul.c{columns:2;padding-left:1.1rem}.mut{color:var(--mut)}
 footer{margin-top:2rem;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8rem}
 @media(max-width:480px){body{font-size:17px}ul.c{columns:1}}
 """
@@ -49,6 +49,7 @@ def pagina(cuerpo,q='',capa='ambas',modo='entrada'):
 <title>Brisson · léxico jurídico latino</title><style>{CSS}</style></head><body><main>
 <h1>Brisson, <i>De verborum quae ad ius pertinent significatione</i></h1>
 <p class="sub">Edición de Heineccio (Halle, 1743). Texto de OCR, con Brisson y Heineccio en capas distintas.</p>
+<figure class="fr"><img src="/portada.jpg" alt="Frontispicio grabado de la edición de 1743: retratos de Brisson y de Heineccio" width="900" height="806" loading="lazy"><figcaption>Frontispicio de la edición de 1743 (grabado de G. A. Gründler y Susang): Brisson y Heineccio. Imagen de la ULB Sachsen-Anhalt, Halle.</figcaption></figure>
 <form method="get" action="/"><input type="text" name="q" value="{html.escape(q)}" placeholder="palabra latina, p. ej. exagium" autocapitalize="none" autocorrect="off" spellcheck="false" autofocus><button>Buscar</button>
 <div class="opts"><label><input type="radio" name="modo" value="entrada"{sel(modo,'entrada')}> entrada</label><label><input type="radio" name="modo" value="texto"{sel(modo,'texto')}> en todo el texto</label>
 <label>capa <select name="capa"><option value="ambas"{' selected' if capa=='ambas' else ''}>ambas</option><option value="brisson"{' selected' if capa=='brisson' else ''}>solo Brisson</option><option value="heineccio"{' selected' if capa=='heineccio' else ''}>solo Heineccio</option><option value="corchetes"{' selected' if capa=='corchetes' else ''}>solo corchetes</option></select></label></div></form>
@@ -65,6 +66,12 @@ def _prefacio(imagen_url):
             if par.strip(): out.append('<p>'+_fmt(par.strip())+'</p>')
     out.append('</div>');return ''.join(out)
 def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
+    import os
+    from starlette.responses import Response
+    @mcp.custom_route("/portada.jpg",methods=["GET"])
+    async def portada(request):
+        b=open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'portada.jpg'),'rb').read()
+        return Response(b,media_type='image/jpeg',headers={'Cache-Control':'public, max-age=86400'})
     @mcp.custom_route("/prefacio",methods=["GET"])
     async def prefacio(request):
         frag=_prefacio(imagen_url)
