@@ -91,6 +91,7 @@ def _vid(t):
     out.append(t[pos:]);return ''.join(out)
 _FUENTES=[None]
 _LEXS=[]
+_LEXV={}
 _PRE=r"(?:S\.?\s?C\.?|Senatusconsult\w*|[Ll]ex|[Ll]ege|[Ll]egem|[Ll]egis)\s+(?:de\s+)?"
 def _lex_cargar(L):
     for x in L:
@@ -225,16 +226,32 @@ def registrar(mcp,D,BY,KEYS,key,stems,imagen_url):
     indices.montar(mcp,D,pagina,_AUT,_RXA)
     import romanos
     _lex_cargar(_j.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'leges.json'),encoding='utf-8')))
+    def _precalc():
+        try:
+            for x,con,sin in _LEXS:
+                vs=collections.Counter()
+                for i,e in enumerate(D):
+                    for sg in e['segs']:
+                        tx=sg['t'].replace(I0,'').replace(I1,'')
+                        n=len(con.findall(tx))+(len(sin.findall(tx)) if sin else 0)
+                        if n: vs[i]+=n
+                _LEXV[x['id']]=vs.most_common()
+        except Exception: _LEXV.clear()
+    import threading;threading.Thread(target=_precalc,daemon=True).start()
     @mcp.custom_route("/leges",methods=["GET"])
     async def leges(request):
         cuerpo=["<h2>Leges et senatus consulta</h2><p class='mut'>Leyes y senadoconsultos romanos que cita el l\u00e9xico, con una breve descripci\u00f3n en espa\u00f1ol y las fuentes de donde sale (Instituciones, Digesto y Gayo en la edici\u00f3n de BIA; Wikipedia para las dem\u00e1s). Cada menci\u00f3n en el texto enlaza aqu\u00ed. Las voces citan esas leyes con variantes de OCR; las leyes con muchos hom\u00f3nimos (Cornelia, Iulia\u2026) no se incluyen todav\u00eda.</p>"]
+        if not _LEXV:
+            for x,con,sin in _LEXS:
+                vs=collections.Counter()
+                for i,e in enumerate(D):
+                    for sg in e['segs']:
+                        tx=sg['t'].replace(I0,'').replace(I1,'')
+                        n=len(con.findall(tx))+(len(sin.findall(tx)) if sin else 0)
+                        if n: vs[i]+=n
+                _LEXV[x['id']]=vs.most_common()
         for x,con,sin in _LEXS:
-            vs=collections.Counter()
-            for i,e in enumerate(D):
-                for sg in e['segs']:
-                    tx=sg['t'].replace(I0,'').replace(I1,'')
-                    n=len(con.findall(tx))+(len(sin.findall(tx)) if sin else 0)
-                    if n: vs[i]+=n
+            vs=collections.Counter(dict(_LEXV[x['id']]))
             fu=' \u00b7 '.join(f"<a href='{html.escape(f['u'])}'"+(" target='_blank' rel='noopener'" if f['u'].startswith('http') else '')+f">{html.escape(f['t'])}</a>" for f in x['fuentes'])
             vo=' '.join(f"<a href='/entrada?n={i}'>{html.escape(D[i]['hw'])}</a>" for i,_ in vs.most_common(40))
             cuerpo.append(f"<div class='lx' id='{x['id']}'><h3>{html.escape(x['nombre'])}</h3><div class='meta'>{x['tipo']} \u00b7 {sum(vs.values())} menci\u00f3n(es) en {len(vs)} voz(es)</div><p>{html.escape(x['desc'])}</p><p class='mut'>Fuente: {fu}</p>"+(f"<p class='vs' lang='la'>{vo}</p>" if vo else '')+"</div>")
